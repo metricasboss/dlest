@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLest E-commerce Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .product { border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; }
+        button { padding: 0.5rem 1rem; margin: 0.5rem; cursor: pointer; }
+        .cart { background: #f0f0f0; padding: 1rem; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <h1>E-commerce Test Page</h1>
+    
+    <div class="product" data-product-id="prod-123">
+        <h2>Test Product</h2>
+        <p>Price: $99.99</p>
+        <button id="add-to-cart">Add to Cart</button>
+        <button id="add-to-wishlist">Add to Wishlist</button>
+    </div>
+    
+    <div class="cart">
+        <h3>Shopping Cart</h3>
+        <div id="cart-items">Empty</div>
+        <button id="checkout">Proceed to Checkout</button>
+        <button id="clear-cart">Clear Cart</button>
+    </div>
+    
+    <script>
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+        
+        // Track product view
+        dataLayer.push({
+            event: 'view_item',
+            currency: 'USD',
+            value: 99.99,
+            items: [{
+                item_id: 'prod-123',
+                item_name: 'Test Product',
+                category: 'Test Category',
+                price: 99.99,
+                quantity: 1
+            }]
+        });
+        
+        // Add to cart
+        document.getElementById('add-to-cart').addEventListener('click', function() {
+            dataLayer.push({
+                event: 'add_to_cart',
+                currency: 'USD',
+                value: 99.99,
+                items: [{
+                    item_id: 'prod-123',
+                    item_name: 'Test Product',
+                    quantity: 1,
+                    price: 99.99
+                }]
+            });
+            
+            document.getElementById('cart-items').innerHTML = '1 x Test Product ($99.99)';
+        });
+        
+        // Add to wishlist
+        document.getElementById('add-to-wishlist').addEventListener('click', function() {
+            dataLayer.push({
+                event: 'add_to_wishlist',
+                currency: 'USD',
+                value: 99.99,
+                items: [{
+                    item_id: 'prod-123',
+                    item_name: 'Test Product'
+                }]
+            });
+        });
+        
+        // Checkout
+        document.getElementById('checkout').addEventListener('click', function() {
+            if (document.getElementById('cart-items').innerHTML !== 'Empty') {
+                dataLayer.push({
+                    event: 'begin_checkout',
+                    currency: 'USD',
+                    value: 99.99,
+                    items: [{
+                        item_id: 'prod-123',
+                        item_name: 'Test Product',
+                        quantity: 1
+                    }]
+                });
+                
+                // Simulate purchase after 1 second
+                setTimeout(() => {
+                    dataLayer.push({
+                        event: 'purchase',
+                        transaction_id: 'test-' + Date.now(),
+                        currency: 'USD',
+                        value: 99.99,
+                        tax: 8.99,
+                        shipping: 5.00,
+                        items: [{
+                            item_id: 'prod-123',
+                            item_name: 'Test Product',
+                            quantity: 1,
+                            price: 99.99
+                        }]
+                    });
+                    alert('Purchase completed!');
+                }, 1000);
+            }
+        });
+        
+        // Clear cart
+        document.getElementById('clear-cart').addEventListener('click', function() {
+            if (document.getElementById('cart-items').innerHTML !== 'Empty') {
+                dataLayer.push({
+                    event: 'remove_from_cart',
+                    currency: 'USD',
+                    value: 99.99,
+                    items: [{
+                        item_id: 'prod-123',
+                        item_name: 'Test Product'
+                    }]
+                });
+                document.getElementById('cart-items').innerHTML = 'Empty';
+            }
+        });
+    </script>
+</body>
+</html>

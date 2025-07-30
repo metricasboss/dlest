@@ -1,0 +1,66 @@
+{
+  "name": "dlest",
+  "version": "0.1.0",
+  "description": "Jest for your data layer - test runner for analytics tracking implementations",
+  "main": "src/api/index.js",
+  "bin": {
+    "dlest": "bin/dlest.js"
+  },
+  "scripts": {
+    "test": "node bin/dlest.js",
+    "test:serve": "node bin/dlest.js --serve",
+    "serve": "node bin/dlest.js serve",
+    "serve:dev": "node bin/dlest.js serve --verbose",
+    "dev": "node bin/dlest.js --watch",
+    "build": "echo 'No build step required'",
+    "lint": "echo 'Linting not configured yet'",
+    "prepare": "chmod +x bin/dlest.js",
+    "prepublishOnly": "npm test",
+    "version": "npm run changelog && git add CHANGELOG.md",
+    "postversion": "git push && git push --tags",
+    "changelog": "echo 'Update CHANGELOG.md manually'"
+  },
+  "keywords": [
+    "testing",
+    "analytics",
+    "data-layer",
+    "gtm",
+    "ga4",
+    "playwright",
+    "jest",
+    "e2e"
+  ],
+  "author": "MetricasBoss",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "commander": "^11.1.0",
+    "jest-matcher-utils": "^29.7.0",
+    "glob": "^10.3.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "templates/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metricasboss/dlest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/metricasboss/dlest/issues"
+  },
+  "homepage": "https://github.com/metricasboss/dlest#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

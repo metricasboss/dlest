@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLest Test Page</title>
+</head>
+<body>
+    <h1>DLest Test Page</h1>
+    <p>This page is used for testing data layer events.</p>
+    
+    <button id="tracked-button">Click Me (Tracked)</button>
+    <button id="add-to-cart">Add to Cart</button>
+    <button id="checkout">Checkout</button>
+    
+    <script>
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+        
+        // Fire page view event
+        dataLayer.push({
+            event: 'page_view',
+            page_title: document.title,
+            page_location: window.location.href
+        });
+        
+        // Track button clicks
+        document.getElementById('tracked-button').addEventListener('click', function() {
+            dataLayer.push({
+                event: 'button_click',
+                button_name: 'test-button',
+                timestamp: Date.now()
+            });
+        });
+        
+        document.getElementById('add-to-cart').addEventListener('click', function() {
+            dataLayer.push({
+                event: 'add_to_cart',
+                currency: 'USD',
+                value: 99.99,
+                items: [{
+                    item_id: 'test-product',
+                    item_name: 'Test Product',
+                    quantity: 1
+                }]
+            });
+        });
+        
+        document.getElementById('checkout').addEventListener('click', function() {
+            dataLayer.push({
+                event: 'purchase',
+                transaction_id: 'test-' + Date.now(),
+                currency: 'USD',
+                value: 99.99,
+                items: [{
+                    item_id: 'test-product',
+                    item_name: 'Test Product',
+                    quantity: 1
+                }]
+            });
+        });
+    </script>
+</body>
+</html>

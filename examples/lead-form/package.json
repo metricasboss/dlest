@@ -1,0 +1,22 @@
+{
+  "name": "dlest-lead-form-example",
+  "version": "1.0.0",
+  "description": "Exemplo de formulário de lead para demonstrar o DLest",
+  "private": true,
+  "scripts": {
+    "test": "dlest lead-form.test.js",
+    "test:serve": "dlest --serve lead-form.test.js",
+    "serve": "dlest serve --port 3000",
+    "dev": "dlest --watch --serve lead-form.test.js"
+  },
+  "dependencies": {
+    "dlest": "^0.1.0"
+  },
+  "keywords": [
+    "dlest",
+    "example",
+    "lead-form",
+    "analytics",
+    "testing"
+  ]
+}

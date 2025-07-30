@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo DLest - Formulário de Lead</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .debug {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Solicite uma Demonstração</h1>
+        
+        <form id="leadForm">
+            <div class="form-group">
+                <label for="name">Nome Completo *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">E-mail *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Empresa</label>
+                <input type="text" id="company" name="company">
+            </div>
+            
+            <div class="form-group">
+                <label for="interest">Interesse</label>
+                <select id="interest" name="interest">
+                    <option value="">Selecione...</option>
+                    <option value="analytics">Analytics e Métricas</option>
+                    <option value="testing">Testes Automatizados</option>
+                    <option value="integration">Integração</option>
+                    <option value="other">Outro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Mensagem</label>
+                <textarea id="message" name="message" rows="4" placeholder="Conte-nos mais sobre sua necessidade..."></textarea>
+            </div>
+            
+            <button type="submit">Enviar Solicitação</button>
+        </form>
+        
+        <div id="successMessage" class="success-message">
+            ✅ Obrigado! Sua solicitação foi enviada com sucesso. Entraremos em contato em breve.
+        </div>
+        
+        <div class="debug">
+            <strong>Debug - Eventos DataLayer:</strong>
+            <div id="debugEvents">Aguardando eventos...</div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar dataLayer
+        window.dataLayer = window.dataLayer || [];
+        
+        // Debug: Mostrar eventos no painel
+        const debugDiv = document.getElementById('debugEvents');
+        const originalPush = window.dataLayer.push;
+        
+        window.dataLayer.push = function(...args) {
+            // Chamar método original
+            originalPush.apply(window.dataLayer, args);
+            
+            // Mostrar no debug
+            args.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${JSON.stringify(event, null, 2)}`;
+                eventDiv.style.marginBottom = '10px';
+                eventDiv.style.padding = '8px';
+                eventDiv.style.backgroundColor = '#e3f2fd';
+                eventDiv.style.borderLeft = '3px solid #2196f3';
+                debugDiv.appendChild(eventDiv);
+            });
+        };
+        
+        // Evento de page view
+        dataLayer.push({
+            event: 'page_view',
+            page_title: document.title,
+            page_location: window.location.href,
+            timestamp: Date.now()
+        });
+        
+        // Capturar envio do formulário
+        document.getElementById('leadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Coletar dados do formulário
+            const formData = new FormData(this);
+            const leadData = {};
+            for (let [key, value] of formData.entries()) {
+                leadData[key] = value;
+            }
+            
+            // Disparar evento generate_lead
+            dataLayer.push({
+                event: 'generate_lead',
+                form_name: 'demo_request',
+                lead_source: 'website',
+                lead_type: 'demo_request',
+                user_name: leadData.name,
+                user_email: leadData.email,
+                company: leadData.company || '',
+                interest: leadData.interest || '',
+                message_length: (leadData.message || '').length,
+                form_location: window.location.pathname,
+                timestamp: Date.now(),
+                lead_value: leadData.interest === 'analytics' ? 100 : 50 // Valor estimado do lead
+            });
+            
+            // Simular envio (normalmente seria uma requisição AJAX)
+            setTimeout(() => {
+                // Esconder formulário e mostrar mensagem de sucesso
+                document.getElementById('leadForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Disparar evento de conversão
+                dataLayer.push({
+                    event: 'conversion',
+                    conversion_type: 'lead_submitted',
+                    conversion_value: leadData.interest === 'analytics' ? 100 : 50,
+                    currency: 'BRL'
+                });
+            }, 1000);
+        });
+        
+        // Tracking de interações
+        document.getElementById('interest').addEventListener('change', function() {
+            if (this.value) {
+                dataLayer.push({
+                    event: 'form_interaction',
+                    interaction_type: 'interest_selected',
+                    selected_interest: this.value
+                });
+            }
+        });
+        
+        // Tracking de foco nos campos importantes
+        ['name', 'email'].forEach(fieldId => {
+            document.getElementById(fieldId).addEventListener('focus', function() {
+                dataLayer.push({
+                    event: 'form_interaction',
+                    interaction_type: 'field_focus',
+                    field_name: fieldId
+                });
+            });
+        });
+    </script>
+</body>
+</html>

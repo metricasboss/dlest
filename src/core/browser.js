@@ -134,17 +134,17 @@ class BrowserManager {
     const spyScript = this._getSpyScript();
 
     // Add init script to inject spy on every page
-    await context.addInitScript({
-      content: `
-        ${spyScript}
-        
-        // Initialize spy when page loads
-        if (typeof window !== 'undefined') {
-          // Initialize spy with configured variable name
-          window.__dlest_createDataLayerSpy('${this.config.dataLayer.variableName}');
-        }
-      `
-    });
+    await context.addInitScript(`
+      ${spyScript}
+      
+      // Initialize spy when page loads
+      if (typeof window !== 'undefined') {
+        console.log('[DLest] Initializing data layer spy...');
+        // Initialize spy with configured variable name
+        window.__dlest_createDataLayerSpy('${this.config.dataLayer.variableName}');
+        console.log('[DLest] Data layer spy initialized');
+      }
+    `);
   }
 
   /**
@@ -155,8 +155,15 @@ class BrowserManager {
     
     try {
       const spyContent = fs.readFileSync(spyPath, 'utf8');
-      // Extract just the function content, removing Node.js exports
-      return spyContent.replace(/\/\/ Export for Node\.js[\s\S]*$/, '');
+      // Don't remove anything - the script already handles both browser and Node.js
+      const cleanContent = spyContent;
+      
+      // Log para debug
+      if (this.config.verbose) {
+        console.log(`[DLest] Spy script loaded (${cleanContent.length} chars)`);
+      }
+      
+      return cleanContent;
     } catch (error) {
       throw new Error(`Failed to load data layer spy script: ${error.message}`);
     }

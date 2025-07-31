@@ -7,7 +7,7 @@ const { matcherHint, printReceived, printExpected } = require('jest-matcher-util
  * Usage: expect(dataLayer).toHaveEvent('purchase', { value: 99.90 })
  */
 
-function toHaveEvent(received, eventName, eventData) {
+async function toHaveEvent(received, eventName, eventData) {
   const isNot = this.isNot || false;
   const hint = matcherHint('toHaveEvent', 'dataLayer', 'eventName, eventData', {
     isNot,
@@ -24,7 +24,7 @@ function toHaveEvent(received, eventName, eventData) {
   }
 
   // Get all captured events
-  const events = received.getEvents();
+  const events = await received.getEvents();
   
   // Find events matching the name
   const matchingEvents = events.filter(event => {

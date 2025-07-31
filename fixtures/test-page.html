@@ -24,6 +24,19 @@
             page_location: window.location.href
         });
         
+        // Fire view_item event for e-commerce test
+        dataLayer.push({
+            event: 'view_item',
+            currency: 'USD',
+            value: 99.99,
+            items: [{
+                item_id: 'test-product',
+                item_name: 'Test Product',
+                price: 99.99,
+                quantity: 1
+            }]
+        });
+        
         // Track button clicks
         document.getElementById('tracked-button').addEventListener('click', function() {
             dataLayer.push({

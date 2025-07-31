@@ -30,7 +30,7 @@
     "jest",
     "e2e"
   ],
-  "author": "MetricasBoss",
+  "author": "Lucian Fialho",
   "license": "MIT",
   "engines": {
     "node": ">=16.0.0"

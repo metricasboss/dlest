@@ -7,7 +7,7 @@ const { matcherHint, printReceived, printExpected } = require('jest-matcher-util
  * Usage: expect(dataLayer).toHaveEventData({ currency: 'BRL', value: 99.90 })
  */
 
-function toHaveEventData(received, expectedData) {
+async function toHaveEventData(received, expectedData) {
   const isNot = this.isNot || false;
   const hint = matcherHint('toHaveEventData', 'dataLayer', 'expectedData', {
     isNot,
@@ -24,7 +24,7 @@ function toHaveEventData(received, expectedData) {
   }
 
   // Get all captured events
-  const events = received.getEvents();
+  const events = await received.getEvents();
 
   if (events.length === 0) {
     return {

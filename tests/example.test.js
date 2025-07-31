@@ -1,5 +1,5 @@
-const { test, expect } = require('dlest');
-
+// Para testes internos do DLest, as funções test, expect e describe 
+// são disponibilizadas globalmente pelo test runner
 test.describe('E-commerce Tracking', () => {
   test('product view tracking', async ({ page, dataLayer }) => {
     await page.goto('http://localhost:3000/test-page.html');

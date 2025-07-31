@@ -8,7 +8,7 @@ const { matcherHint, printReceived, printExpected } = require('jest-matcher-util
  * Validates the count of specific events in dataLayer
  * Usage: expect(dataLayer).toHaveEventCount('page_view', 1)
  */
-function toHaveEventCount(received, eventName, expectedCount) {
+async function toHaveEventCount(received, eventName, expectedCount) {
   const isNot = this.isNot || false;
   const hint = matcherHint('toHaveEventCount', 'dataLayer', 'eventName, count', {
     isNot,
@@ -23,7 +23,7 @@ function toHaveEventCount(received, eventName, expectedCount) {
     );
   }
 
-  const events = received.getEvents();
+  const events = await received.getEvents();
   const matchingEvents = events.filter(event => {
     return event.event === eventName || 
            event.eventName === eventName ||
@@ -59,7 +59,7 @@ function toHaveEventCount(received, eventName, expectedCount) {
  * Validates a sequence of events in dataLayer
  * Usage: expect(dataLayer).toHaveEventSequence(['page_view', 'add_to_cart', 'purchase'])
  */
-function toHaveEventSequence(received, expectedSequence) {
+async function toHaveEventSequence(received, expectedSequence) {
   const isNot = this.isNot || false;
   const hint = matcherHint('toHaveEventSequence', 'dataLayer', 'eventSequence', {
     isNot,
@@ -74,7 +74,7 @@ function toHaveEventSequence(received, expectedSequence) {
     );
   }
 
-  const events = received.getEvents();
+  const events = await received.getEvents();
   const eventNames = events.map(event => 
     event.event || event.eventName || event.name || 'unnamed'
   );

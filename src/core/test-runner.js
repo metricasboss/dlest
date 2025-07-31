@@ -25,6 +25,9 @@ class TestRunner {
     this.failures = [];
     this.currentSuite = null;
     this.currentTest = null;
+    this.collectedTests = [];
+    this.collectedSuites = [];
+    this.currentContext = null;
   }
 
   /**
@@ -65,9 +68,17 @@ class TestRunner {
     try {
       // Create test context
       const testContext = await this.createTestContext();
+      this.currentContext = testContext;
       
-      // Load and execute test file
-      await this.executeTestFile(testFilePath, testContext);
+      // Clear collected tests for this file
+      this.collectedTests = [];
+      this.collectedSuites = [];
+      
+      // Load test file to collect tests
+      await this.collectTestsFromFile(testFilePath, testContext);
+      
+      // Execute collected tests
+      await this.executeCollectedTests();
       
       // Cleanup context
       await testContext.cleanup();
@@ -119,34 +130,27 @@ class TestRunner {
   }
 
   /**
-   * Execute test file with context
+   * Collect tests from file
    */
-  async executeTestFile(testFilePath, testContext) {
-    const { testFunctions, page, dataLayer } = testContext;
+  async collectTestsFromFile(testFilePath, testContext) {
+    const { testFunctions } = testContext;
 
     // Make test functions globally available
     Object.assign(global, testFunctions);
-
-    // Also provide page and dataLayer globally for convenience
-    global.page = page;
-    global.dataLayer = dataLayer;
 
     try {
       // Clear Node.js module cache to ensure fresh execution
       delete require.cache[path.resolve(testFilePath)];
       
-      // Execute test file
+      // Execute test file to collect tests
       require(testFilePath);
       
     } catch (error) {
-      throw new Error(`Failed to execute test file: ${error.message}`);
+      throw new Error(`Failed to collect tests from file: ${error.message}`);
     } finally {
-      // Cleanup globals
+      // Cleanup globals except for what we need during execution
       delete global.test;
       delete global.describe;
-      delete global.expect;
-      delete global.page;
-      delete global.dataLayer;
       delete global.beforeEach;
       delete global.afterEach;
       delete global.beforeAll;
@@ -155,23 +159,68 @@ class TestRunner {
   }
 
   /**
-   * Create test function
+   * Execute all collected tests
    */
-  createTestFunction() {
-    return (name, testFn) => {
-      this.runSingleTest(name, testFn);
-    };
+  async executeCollectedTests() {
+    // Group tests by suite
+    const suites = {};
+    const standaloneTests = [];
+
+    for (const test of this.collectedTests) {
+      if (test.suite) {
+        if (!suites[test.suite]) {
+          suites[test.suite] = [];
+        }
+        suites[test.suite].push(test);
+      } else {
+        standaloneTests.push(test);
+      }
+    }
+
+    // Execute suites
+    for (const [suiteName, suiteTests] of Object.entries(suites)) {
+      console.log(chalk.blue(`\n  📋 ${suiteName}`));
+      for (const test of suiteTests) {
+        await this.runSingleTest(test.name, test.testFn);
+      }
+    }
+
+    // Execute standalone tests
+    for (const test of standaloneTests) {
+      await this.runSingleTest(test.name, test.testFn);
+    }
   }
 
   /**
-   * Create describe function
+   * Create test function - collects tests for later execution
+   */
+  createTestFunction() {
+    const testFn = (name, testFn) => {
+      this.collectedTests.push({
+        name,
+        testFn,
+        suite: this.currentSuite
+      });
+    };
+    
+    // Add describe as a method of test
+    testFn.describe = this.createDescribeFunction();
+    
+    return testFn;
+  }
+
+  /**
+   * Create describe function - collects suites and their tests
    */
   createDescribeFunction() {
     return (name, describeFn) => {
       const previousSuite = this.currentSuite;
       this.currentSuite = name;
       
-      console.log(chalk.blue(`\n  📋 ${name}`));
+      this.collectedSuites.push({
+        name,
+        tests: []
+      });
       
       try {
         describeFn();
@@ -302,9 +351,14 @@ class TestRunner {
     this.stats.total++;
 
     const testContext = {
-      page: global.page,
-      dataLayer: global.dataLayer,
+      page: this.currentContext.page,
+      dataLayer: this.currentContext.dataLayer,
     };
+
+    // Make context available globally
+    global.expect = this.currentContext.testFunctions.expect;
+    global.page = testContext.page;
+    global.dataLayer = testContext.dataLayer;
 
     try {
       // Run beforeEach if defined

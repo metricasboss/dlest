@@ -1,6 +1,6 @@
 {
   "name": "dlest-lead-form-example",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Exemplo de formulário de lead para demonstrar o DLest",
   "private": true,
   "scripts": {

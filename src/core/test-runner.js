@@ -288,32 +288,32 @@ class TestRunner {
     const matcherContext = { isNot: false, promise: false };
     
     return {
-      toHaveEvent: (eventName, eventData) => {
-        const result = matchers.toHaveEvent.call(matcherContext, received, eventName, eventData);
+      toHaveEvent: async (eventName, eventData) => {
+        const result = await matchers.toHaveEvent.call(matcherContext, received, eventName, eventData);
         if (!result.pass) {
           throw new Error(result.message());
         }
         return result;
       },
       
-      toHaveEventData: (eventData) => {
-        const result = matchers.toHaveEventData.call(matcherContext, received, eventData);
+      toHaveEventData: async (eventData) => {
+        const result = await matchers.toHaveEventData.call(matcherContext, received, eventData);
         if (!result.pass) {
           throw new Error(result.message());
         }
         return result;
       },
       
-      toHaveEventCount: (eventName, count) => {
-        const result = matchers.toHaveEventCount.call(matcherContext, received, eventName, count);
+      toHaveEventCount: async (eventName, count) => {
+        const result = await matchers.toHaveEventCount.call(matcherContext, received, eventName, count);
         if (!result.pass) {
           throw new Error(result.message());
         }
         return result;
       },
       
-      toHaveEventSequence: (sequence) => {
-        const result = matchers.toHaveEventSequence.call(matcherContext, received, sequence);
+      toHaveEventSequence: async (sequence) => {
+        const result = await matchers.toHaveEventSequence.call(matcherContext, received, sequence);
         if (!result.pass) {
           throw new Error(result.message());
         }
@@ -321,9 +321,9 @@ class TestRunner {
       },
 
       not: {
-        toHaveEvent: (eventName, eventData) => {
+        toHaveEvent: async (eventName, eventData) => {
           const notMatcherContext = { isNot: true, promise: false };
-          const result = matchers.toHaveEvent.call(notMatcherContext, received, eventName, eventData);
+          const result = await matchers.toHaveEvent.call(notMatcherContext, received, eventName, eventData);
           if (!result.pass) {
             throw new Error(result.message());
           }
@@ -356,6 +356,19 @@ class TestRunner {
       toBeFalsy: () => {
         if (received) {
           throw new Error(`Expected ${received} to be falsy`);
+        }
+      },
+      toContain: (expected) => {
+        if (typeof received === 'string') {
+          if (!received.includes(expected)) {
+            throw new Error(`Expected "${received}" to contain "${expected}"`);
+          }
+        } else if (Array.isArray(received)) {
+          if (!received.includes(expected)) {
+            throw new Error(`Expected [${received.join(', ')}] to contain ${expected}`);
+          }
+        } else {
+          throw new Error(`Expected ${received} to be a string or array for toContain matcher`);
         }
       },
     };

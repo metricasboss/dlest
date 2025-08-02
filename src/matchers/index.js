@@ -116,6 +116,130 @@ async function toHaveEventSequence(received, expectedSequence) {
 }
 
 /**
+ * toBeDefined Matcher
+ * 
+ * Basic Jest-like matcher for checking if value is defined
+ * Usage: expect(value).toBeDefined()
+ */
+function toBeDefined(received) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeDefined', 'received', '', {
+    isNot,
+  });
+
+  const pass = received !== undefined && received !== null;
+
+  if (pass) {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value not to be defined, but received: ${printReceived(received)}`,
+      pass: true,
+    };
+  } else {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value to be defined, but received: ${printReceived(received)}`,
+      pass: false,
+    };
+  }
+}
+
+/**
+ * toBeUndefined Matcher
+ * 
+ * Basic Jest-like matcher for checking if value is undefined
+ * Usage: expect(value).toBeUndefined()
+ */
+function toBeUndefined(received) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeUndefined', 'received', '', {
+    isNot,
+  });
+
+  const pass = received === undefined;
+
+  if (pass) {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value not to be undefined, but received: ${printReceived(received)}`,
+      pass: true,
+    };
+  } else {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value to be undefined, but received: ${printReceived(received)}`,
+      pass: false,
+    };
+  }
+}
+
+/**
+ * toBeTruthy Matcher
+ * 
+ * Basic Jest-like matcher for checking if value is truthy
+ * Usage: expect(value).toBeTruthy()
+ */
+function toBeTruthy(received) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeTruthy', 'received', '', {
+    isNot,
+  });
+
+  const pass = Boolean(received);
+
+  if (pass) {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value not to be truthy, but received: ${printReceived(received)}`,
+      pass: true,
+    };
+  } else {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value to be truthy, but received: ${printReceived(received)}`,
+      pass: false,
+    };
+  }
+}
+
+/**
+ * toBeFalsy Matcher
+ * 
+ * Basic Jest-like matcher for checking if value is falsy
+ * Usage: expect(value).toBeFalsy()
+ */
+function toBeFalsy(received) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeFalsy', 'received', '', {
+    isNot,
+  });
+
+  const pass = !Boolean(received);
+
+  if (pass) {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value not to be falsy, but received: ${printReceived(received)}`,
+      pass: true,
+    };
+  } else {
+    return {
+      message: () =>
+        hint + '\n\n' +
+        `Expected value to be falsy, but received: ${printReceived(received)}`,
+      pass: false,
+    };
+  }
+}
+
+/**
  * All DLest custom matchers
  */
 const matchers = {
@@ -123,6 +247,10 @@ const matchers = {
   toHaveEventData,
   toHaveEventCount,
   toHaveEventSequence,
+  toBeDefined,
+  toBeUndefined,
+  toBeTruthy,
+  toBeFalsy,
 };
 
 module.exports = matchers;

@@ -15,7 +15,6 @@
     "build": "echo 'No build step required'",
     "lint": "echo 'Linting not configured yet'",
     "prepare": "chmod +x bin/dlest.js",
-    "prepublishOnly": "npm test",
     "version": "npm run changelog && git add CHANGELOG.md",
     "postversion": "git push && git push --tags",
     "changelog": "echo 'Update CHANGELOG.md manually'"

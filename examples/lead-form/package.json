@@ -9,14 +9,14 @@
     "serve": "dlest serve --port 3000",
     "dev": "dlest --watch --serve lead-form.test.js"
   },
-  "dependencies": {
-    "dlest": "^0.1.0"
-  },
   "keywords": [
     "dlest",
     "example",
     "lead-form",
     "analytics",
     "testing"
-  ]
+  ],
+  "dependencies": {
+    "dlest": "^0.1.1"
+  }
 }

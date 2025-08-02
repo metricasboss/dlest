@@ -1,6 +1,6 @@
 {
   "name": "dlest",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Jest for your data layer - test runner for analytics tracking implementations",
   "main": "src/api/index.js",
   "bin": {

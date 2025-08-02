@@ -82,7 +82,6 @@ class Commands {
       // Create directory structure - fixtures apenas quando solicitado
       const dirs = {
         tests: path.join(baseDir, 'tests'),
-        testsE2e: path.join(baseDir, 'tests', 'e2e'),
       };
 
       // Adicionar fixtures apenas quando necessário
@@ -148,13 +147,8 @@ class Commands {
       }
 
       // Create .gitkeep files in empty directories
-      const gitkeepDirs = [dirs.testsE2e];
       if (withFixtures && dirs.fixturesAssets) {
-        gitkeepDirs.push(dirs.fixturesAssets);
-      }
-      
-      for (const dir of gitkeepDirs) {
-        const gitkeepPath = path.join(dir, '.gitkeep');
+        const gitkeepPath = path.join(dirs.fixturesAssets, '.gitkeep');
         if (!fs.existsSync(gitkeepPath)) {
           fs.writeFileSync(gitkeepPath, '', 'utf8');
         }
@@ -163,8 +157,7 @@ class Commands {
       // Display project structure baseada no que foi criado
       console.log(chalk.cyan('\n📁 Project structure:'));
       console.log(chalk.gray('  tests/'));
-      console.log(chalk.gray('    ├── example.test.js'));
-      console.log(chalk.gray('    └── e2e/'));
+      console.log(chalk.gray('    └── example.test.js'));
       
       if (withFixtures) {
         console.log(chalk.gray('  fixtures/'));

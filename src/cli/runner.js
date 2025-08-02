@@ -99,6 +99,7 @@ class CLIRunner {
       .command('init')
       .description('Initialize DLest in current project')
       .option('--template <type>', 'Template to use (minimal, basic, spa, gtm, ecommerce)', 'basic')
+      .option('--with-fixtures', 'Include HTML fixture files (for static pages)')
       .option('--force', 'Overwrite existing files')
       .action(async (options) => {
         const result = await this.commands.init(options);

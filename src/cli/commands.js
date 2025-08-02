@@ -76,15 +76,20 @@ class Commands {
 
       const template = options.template || 'basic';
       const force = options.force || false;
+      const withFixtures = options.withFixtures || ['ecommerce', 'static'].includes(template);
       const baseDir = process.cwd();
 
-      // Create directory structure
+      // Create directory structure - fixtures apenas quando solicitado
       const dirs = {
         tests: path.join(baseDir, 'tests'),
         testsE2e: path.join(baseDir, 'tests', 'e2e'),
-        fixtures: path.join(baseDir, 'fixtures'),
-        fixturesAssets: path.join(baseDir, 'fixtures', 'assets'),
       };
+
+      // Adicionar fixtures apenas quando necessário
+      if (withFixtures) {
+        dirs.fixtures = path.join(baseDir, 'fixtures');
+        dirs.fixturesAssets = path.join(baseDir, 'fixtures', 'assets');
+      }
 
       // Create all directories
       for (const [name, dirPath] of Object.entries(dirs)) {
@@ -104,49 +109,50 @@ class Commands {
         }
       }
 
-      // Create .gitignore
-      const gitignorePath = path.join(baseDir, '.gitignore');
-      const gitignoreExists = fs.existsSync(gitignorePath);
-      
-      if (!gitignoreExists || force) {
-        const gitignoreContent = this.getGitignoreTemplate();
-        if (gitignoreExists) {
-          // Append to existing .gitignore
-          const existingContent = fs.readFileSync(gitignorePath, 'utf8');
-          if (!existingContent.includes('# DLest')) {
-            fs.appendFileSync(gitignorePath, '\n\n' + gitignoreContent, 'utf8');
-            console.log(chalk.green(`✓ Updated .gitignore with DLest entries`));
-          }
-        } else {
-          fs.writeFileSync(gitignorePath, gitignoreContent, 'utf8');
+      // Handle .gitignore intelligently
+      const gitignoreResult = this.updateGitignore(baseDir, force);
+      switch (gitignoreResult) {
+        case 'created':
           console.log(chalk.green(`✓ Created .gitignore`));
-        }
+          break;
+        case 'updated':
+          console.log(chalk.green(`✓ Updated .gitignore (added DLest entries)`));
+          break;
+        case 'exists':
+          console.log(chalk.gray(`ℹ .gitignore already contains DLest entries`));
+          break;
       }
 
       // Create example test file
       const testFilePath = path.join(dirs.tests, 'example.test.js');
       
       if (!fs.existsSync(testFilePath) || force) {
-        const testContent = this.getTestTemplate(template);
+        const testContent = this.getTestTemplate(template, withFixtures);
         fs.writeFileSync(testFilePath, testContent, 'utf8');
         console.log(chalk.green(`✓ Created example test: tests/example.test.js`));
       } else {
         console.log(chalk.yellow(`⚠️  Example test already exists, skipping...`));
       }
 
-      // Create HTML fixtures
-      const htmlFiles = this.getHTMLFixtures(template);
-      
-      for (const [filename, content] of Object.entries(htmlFiles)) {
-        const htmlPath = path.join(dirs.fixtures, filename);
-        if (!fs.existsSync(htmlPath) || force) {
-          fs.writeFileSync(htmlPath, content, 'utf8');
-          console.log(chalk.green(`✓ Created fixture: fixtures/${filename}`));
+      // Create HTML fixtures apenas se withFixtures for true
+      if (withFixtures) {
+        const htmlFiles = this.getHTMLFixtures(template);
+        
+        for (const [filename, content] of Object.entries(htmlFiles)) {
+          const htmlPath = path.join(dirs.fixtures, filename);
+          if (!fs.existsSync(htmlPath) || force) {
+            fs.writeFileSync(htmlPath, content, 'utf8');
+            console.log(chalk.green(`✓ Created fixture: fixtures/${filename}`));
+          }
         }
       }
 
       // Create .gitkeep files in empty directories
-      const gitkeepDirs = [dirs.testsE2e, dirs.fixturesAssets];
+      const gitkeepDirs = [dirs.testsE2e];
+      if (withFixtures && dirs.fixturesAssets) {
+        gitkeepDirs.push(dirs.fixturesAssets);
+      }
+      
       for (const dir of gitkeepDirs) {
         const gitkeepPath = path.join(dir, '.gitkeep');
         if (!fs.existsSync(gitkeepPath)) {
@@ -154,25 +160,36 @@ class Commands {
         }
       }
 
-      // Display project structure
+      // Display project structure baseada no que foi criado
       console.log(chalk.cyan('\n📁 Project structure:'));
       console.log(chalk.gray('  tests/'));
       console.log(chalk.gray('    ├── example.test.js'));
       console.log(chalk.gray('    └── e2e/'));
-      console.log(chalk.gray('  fixtures/'));
-      console.log(chalk.gray('    ├── test-page.html'));
-      if (template === 'ecommerce') {
-        console.log(chalk.gray('    ├── products.html'));
+      
+      if (withFixtures) {
+        console.log(chalk.gray('  fixtures/'));
+        console.log(chalk.gray('    ├── test-page.html'));
+        if (template === 'ecommerce') {
+          console.log(chalk.gray('    ├── products.html'));
+        }
+        console.log(chalk.gray('    └── assets/'));
       }
-      console.log(chalk.gray('    └── assets/'));
+      
       console.log(chalk.gray('  dlest.config.js'));
       console.log(chalk.gray('  .gitignore'));
 
       console.log(chalk.cyan('\n🎉 DLest initialized successfully!'));
       console.log(chalk.gray('\nNext steps:'));
-      console.log(chalk.gray('  1. Install dependencies: npm install --save-dev dlest'));
-      console.log(chalk.gray('  2. Start dev server: npx dlest serve --root ./fixtures'));
-      console.log(chalk.gray('  3. Run tests: npx dlest'));
+      
+      if (withFixtures) {
+        console.log(chalk.gray('  1. Start dev server: npx dlest serve'));
+        console.log(chalk.gray('  2. Run tests: npx dlest'));
+      } else {
+        console.log(chalk.gray('  1. Make sure your app is running (e.g., npm run dev)'));
+        console.log(chalk.gray('  2. Update baseURL in dlest.config.js if needed'));
+        console.log(chalk.gray('  3. Run tests: npx dlest'));
+      }
+      
       console.log(chalk.gray('\nLearn more: https://github.com/metricasboss/dlest'));
 
       return { success: true };
@@ -242,6 +259,46 @@ playwright/.cache/
   }
 
   /**
+   * Update .gitignore intelligently
+   */
+  updateGitignore(baseDir, force = false) {
+    const gitignorePath = path.join(baseDir, '.gitignore');
+    const dlestEntries = [
+      '# DLest',
+      '.dlest-cache/',
+      'test-results/',
+      'playwright-report/',
+      'playwright/.cache/'
+    ];
+
+    if (fs.existsSync(gitignorePath)) {
+      const content = fs.readFileSync(gitignorePath, 'utf8');
+      
+      // Verificar quais entradas estão faltando
+      const missingEntries = dlestEntries.filter(entry => {
+        // Para # DLest, verifica se já tem alguma seção DLest
+        if (entry === '# DLest') {
+          return !content.includes('# DLest') && !content.includes('.dlest-cache');
+        }
+        return !content.includes(entry.replace(/\/$/, '')); // Remove trailing slash for check
+      });
+      
+      if (missingEntries.length > 0) {
+        const newContent = '\n\n' + missingEntries.join('\n');
+        fs.appendFileSync(gitignorePath, newContent);
+        return 'updated';
+      }
+      
+      return 'exists';
+    } else {
+      // Criar novo .gitignore completo
+      const fullTemplate = this.getGitignoreTemplate();
+      fs.writeFileSync(gitignorePath, fullTemplate);
+      return 'created';
+    }
+  }
+
+  /**
    * Get HTML fixtures based on template
    */
   getHTMLFixtures(template) {
@@ -259,7 +316,12 @@ playwright/.cache/
   /**
    * Get test template based on type
    */
-  getTestTemplate(template) {
+  getTestTemplate(template, withFixtures = false) {
+    // Se não tem fixtures, usar templates para aplicações reais
+    if (!withFixtures && template === 'basic') {
+      return this.getRealAppTestTemplate();
+    }
+    
     const templates = {
       minimal: `const { test, expect } = require('dlest');
 
@@ -434,6 +496,41 @@ test.describe('E-commerce Tracking', () => {
     };
 
     return templates[template] || templates.basic;
+  }
+
+  /**
+   * Get test template for real applications (without fixtures)
+   */
+  getRealAppTestTemplate() {
+    return `// Para o DLest, test, expect e describe são disponibilizados globalmente
+test.describe('App Analytics', () => {
+  test('page view tracking', async ({ page, dataLayer }) => {
+    // Navegar para sua aplicação (ajuste a URL conforme necessário)
+    await page.goto('http://localhost:3000');
+    
+    // Verificar se o evento de visualização de página foi disparado
+    expect(dataLayer).toHaveEvent('page_view');
+  });
+
+  test('basic interaction tracking', async ({ page, dataLayer }) => {
+    await page.goto('http://localhost:3000');
+    
+    // Exemplo: interação que deve disparar um evento
+    // Descomente e ajuste conforme sua aplicação:
+    
+    // await page.click('#my-button');
+    // expect(dataLayer).toHaveEvent('button_click');
+    
+    // await page.fill('#search-input', 'test');
+    // expect(dataLayer).toHaveEvent('search', {
+    //   search_term: 'test'
+    // });
+    
+    // Para este exemplo, apenas verificamos que não há erros
+    const events = await dataLayer.getEvents();
+    expect(events).toBeDefined();
+  });
+});`;
   }
 
   /**

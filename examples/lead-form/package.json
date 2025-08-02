@@ -17,6 +17,6 @@
     "testing"
   ],
   "dependencies": {
-    "dlest": "^0.1.3"
+    "dlest": "^0.1.4"
   }
 }

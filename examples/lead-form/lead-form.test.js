@@ -1,18 +1,17 @@
-const { test, expect } = require('dlest');
-
+// Para o DLest, test, expect e describe são disponibilizados globalmente
 test.describe('Formulário de Lead', () => {
   test('deve disparar evento page_view ao carregar a página', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     expect(dataLayer).toHaveEvent('page_view', {
       page_title: 'Exemplo DLest - Formulário de Lead',
-      page_location: expect.stringContaining('/examples/lead-form/index.html'),
+      page_location: expect.stringContaining('/index.html'),
       timestamp: expect.any(Number)
     });
   });
 
   test('deve disparar evento form_interaction ao selecionar interesse', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Limpar eventos anteriores
     await dataLayer.clear();
@@ -27,7 +26,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve disparar evento form_interaction ao focar em campos obrigatórios', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Limpar eventos anteriores
     await dataLayer.clear();
@@ -51,7 +50,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve disparar evento generate_lead ao enviar formulário', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Preencher formulário
     await page.fill('#name', 'João Silva');
@@ -77,14 +76,14 @@ test.describe('Formulário de Lead', () => {
       company: 'Empresa Teste LTDA',
       interest: 'analytics',
       message_length: expect.any(Number),
-      form_location: expect.stringContaining('/examples/lead-form/index.html'),
+      form_location: expect.stringContaining('/index.html'),
       timestamp: expect.any(Number),
       lead_value: 100 // analytics tem valor 100
     });
   });
 
   test('deve disparar evento conversion após envio bem-sucedido', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Preencher formulário
     await page.fill('#name', 'Maria Santos');
@@ -107,7 +106,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve mostrar mensagem de sucesso após envio', async ({ page }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Preencher campos obrigatórios
     await page.fill('#name', 'Pedro Costa');
@@ -128,7 +127,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve validar campos obrigatórios', async ({ page }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Tentar enviar formulário sem preencher campos obrigatórios
     await page.click('button[type="submit"]');
@@ -143,7 +142,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve calcular valor do lead baseado no interesse selecionado', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Teste com interesse 'analytics' (valor alto)
     await page.fill('#name', 'Ana Oliveira');
@@ -166,7 +165,7 @@ test.describe('Formulário de Lead', () => {
   });
 
   test('deve trackear sequência completa de eventos', async ({ page, dataLayer }) => {
-    await page.goto('http://localhost:3000/examples/lead-form/index.html');
+    await page.goto('http://localhost:3000/index.html');
     
     // Limpar eventos iniciais
     await dataLayer.clear();

@@ -247,6 +247,13 @@ class DataLayerProxy {
       }
     });
   }
+
+  /**
+   * Clear captured events (alias for clearEvents)
+   */
+  async clear() {
+    return await this.clearEvents();
+  }
 }
 
 module.exports = { BrowserManager, DataLayerProxy };

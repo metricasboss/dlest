@@ -270,6 +270,14 @@ class TestRunner {
       toString: () => `ObjectContaining<${JSON.stringify(expectedObject)}>`,
     });
 
+    expect.stringContaining = (expectedString) => ({
+      asymmetricMatch: (string) => {
+        if (typeof string !== 'string') return false;
+        return string.includes(expectedString);
+      },
+      toString: () => `StringContaining<${expectedString}>`,
+    });
+
     return expect;
   }
 
@@ -338,6 +346,16 @@ class TestRunner {
       toEqual: (expected) => {
         if (JSON.stringify(received) !== JSON.stringify(expected)) {
           throw new Error(`Expected ${JSON.stringify(received)} to equal ${JSON.stringify(expected)}`);
+        }
+      },
+      toBeTruthy: () => {
+        if (!received) {
+          throw new Error(`Expected ${received} to be truthy`);
+        }
+      },
+      toBeFalsy: () => {
+        if (received) {
+          throw new Error(`Expected ${received} to be falsy`);
         }
       },
     };

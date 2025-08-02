@@ -228,6 +228,13 @@ class DataLayerProxy {
   }
 
   /**
+   * Get page instance for debugging
+   */
+  async getPage() {
+    return this.page;
+  }
+
+  /**
    * Wait for specific event
    */
   async waitForEvent(eventName, timeout = this.config.waitTimeout) {

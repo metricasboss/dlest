@@ -285,13 +285,120 @@ class TestRunner {
    * Create DataLayer-specific matchers
    */
   createDataLayerMatchers(received) {
-    const matcherContext = { isNot: false, promise: false };
+    const matcherContext = { 
+      isNot: false, 
+      promise: false,
+      verbose: this.config.verbose 
+    };
     
     return {
       toHaveEvent: async (eventName, eventData) => {
-        const result = await matchers.toHaveEvent.call(matcherContext, received, eventName, eventData);
+        // Capture events BEFORE executing the matcher (to avoid navigation issues)
+        let allEvents = [];
+        let dataLayerInfo = null;
+        
+        if (this.config.verbose) {
+          try {
+            allEvents = await received.getEvents();
+            
+            // Only get debug info if no events found
+            if (allEvents.length === 0) {
+              const page = await received.getPage();
+              dataLayerInfo = await page.evaluate(() => {
+                return {
+                  exists: typeof window.dataLayer !== 'undefined',
+                  isArray: Array.isArray(window.dataLayer),
+                  length: window.dataLayer ? window.dataLayer.length : 0,
+                  content: window.dataLayer ? JSON.stringify(window.dataLayer.slice(0, 5)) : null,
+                  spyExists: typeof window.__dlest_events !== 'undefined',
+                  spyLength: window.__dlest_events ? window.__dlest_events.length : 0,
+                  spyContent: window.__dlest_events ? JSON.stringify(window.__dlest_events.slice(0, 5)) : null
+                };
+              });
+            }
+          } catch (e) {
+            console.log(chalk.gray(`    ❌ Error getting events before test: ${e.message}`));
+          }
+        }
+        
+        if (this.config.verbose) {
+          const testId = Math.random().toString(36).substr(2, 9);
+          console.log(chalk.gray(`    🔧 [DEBUG] Test ID: ${testId} - About to execute matcher for "${eventName}"`));
+        }
+        
+        // Create a mock received object that uses the pre-captured events
+        const mockReceived = {
+          getEvents: async () => allEvents,
+          getPage: received.getPage.bind(received)
+        };
+        
+        const result = await matchers.toHaveEvent.call(matcherContext, mockReceived, eventName, eventData);
+        
+        if (this.config.verbose) {
+          console.log(chalk.gray(`    🔧 [DEBUG] Matcher result: ${result.pass ? 'PASS' : 'FAIL'}`));
+        }
+        
+        // Show verbose information using pre-captured data
+        if (this.config.verbose) {
+          const matchingEvents = allEvents.filter(event => {
+            return event.event === eventName || 
+                   event.eventName === eventName ||
+                   event.name === eventName;
+          });
+          
+          console.log(chalk.gray(`    🔍 Expected: event "${eventName}"${eventData ? ` with data ${JSON.stringify(eventData)}` : ''}`));
+          console.log(chalk.gray(`    📊 Found: ${matchingEvents.length} matching event(s) out of ${allEvents.length} total`));
+          
+          if (matchingEvents.length > 0) {
+            console.log(chalk.gray(`    ✅ Matching events:`));
+            matchingEvents.forEach((event, index) => {
+              console.log(chalk.gray(`       ${index + 1}. ${JSON.stringify(event, null, 8)}`));
+            });
+          }
+          
+          if (allEvents.length > 0) {
+            console.log(chalk.gray(`    📋 All captured events:`));
+            allEvents.forEach((event, index) => {
+              const isMatch = event.event === eventName || event.eventName === eventName || event.name === eventName;
+              const prefix = isMatch ? '    ✅' : '    ⚪';
+              console.log(chalk.gray(`${prefix} ${index + 1}. ${JSON.stringify(event, null, 8)}`));
+            });
+          } else {
+            console.log(chalk.gray(`    ⚠️  No events captured`));
+            
+            if (dataLayerInfo) {
+              console.log(chalk.gray(`    🔍 DataLayer debug:`));
+              console.log(chalk.gray(`       - window.dataLayer exists: ${dataLayerInfo.exists}`));
+              console.log(chalk.gray(`       - is array: ${dataLayerInfo.isArray}`));
+              console.log(chalk.gray(`       - length: ${dataLayerInfo.length}`));
+              console.log(chalk.gray(`       - content: ${dataLayerInfo.content}`));
+              console.log(chalk.gray(`    🔍 DLest spy debug:`));
+              console.log(chalk.gray(`       - spy exists: ${dataLayerInfo.spyExists}`));
+              console.log(chalk.gray(`       - spy length: ${dataLayerInfo.spyLength}`));
+              console.log(chalk.gray(`       - spy content: ${dataLayerInfo.spyContent}`));
+            }
+          }
+        }
+        
         if (!result.pass) {
-          throw new Error(result.message());
+          let errorMessage = result.message();
+          
+          // Add verbose information if enabled for failures
+          if (this.config.verbose) {
+            try {
+              const allEvents = await received.getEvents();
+              if (allEvents.length > 0) {
+                errorMessage += '\n\n' + chalk.gray('📋 All captured events:');
+                allEvents.forEach((event, index) => {
+                  errorMessage += '\n' + chalk.gray(`${index + 1}. ${JSON.stringify(event, null, 2)}`);
+                });
+              }
+            } catch (e) {
+              // Ignore errors when getting events for verbose output
+            }
+          }
+          
+          throw new Error(errorMessage);
         }
         return result;
       },
@@ -299,7 +406,23 @@ class TestRunner {
       toHaveEventData: async (eventData) => {
         const result = await matchers.toHaveEventData.call(matcherContext, received, eventData);
         if (!result.pass) {
-          throw new Error(result.message());
+          let errorMessage = result.message();
+          
+          if (this.config.verbose) {
+            try {
+              const allEvents = await received.getEvents();
+              if (allEvents.length > 0) {
+                errorMessage += '\n\n' + chalk.gray('📋 All captured events:');
+                allEvents.forEach((event, index) => {
+                  errorMessage += '\n' + chalk.gray(`${index + 1}. ${JSON.stringify(event, null, 2)}`);
+                });
+              }
+            } catch (e) {
+              // Ignore errors when getting events for verbose output
+            }
+          }
+          
+          throw new Error(errorMessage);
         }
         return result;
       },
@@ -307,7 +430,23 @@ class TestRunner {
       toHaveEventCount: async (eventName, count) => {
         const result = await matchers.toHaveEventCount.call(matcherContext, received, eventName, count);
         if (!result.pass) {
-          throw new Error(result.message());
+          let errorMessage = result.message();
+          
+          if (this.config.verbose) {
+            try {
+              const allEvents = await received.getEvents();
+              if (allEvents.length > 0) {
+                errorMessage += '\n\n' + chalk.gray('📋 All captured events:');
+                allEvents.forEach((event, index) => {
+                  errorMessage += '\n' + chalk.gray(`${index + 1}. ${JSON.stringify(event, null, 2)}`);
+                });
+              }
+            } catch (e) {
+              // Ignore errors when getting events for verbose output
+            }
+          }
+          
+          throw new Error(errorMessage);
         }
         return result;
       },
@@ -315,7 +454,23 @@ class TestRunner {
       toHaveEventSequence: async (sequence) => {
         const result = await matchers.toHaveEventSequence.call(matcherContext, received, sequence);
         if (!result.pass) {
-          throw new Error(result.message());
+          let errorMessage = result.message();
+          
+          if (this.config.verbose) {
+            try {
+              const allEvents = await received.getEvents();
+              if (allEvents.length > 0) {
+                errorMessage += '\n\n' + chalk.gray('📋 All captured events:');
+                allEvents.forEach((event, index) => {
+                  errorMessage += '\n' + chalk.gray(`${index + 1}. ${JSON.stringify(event, null, 2)}`);
+                });
+              }
+            } catch (e) {
+              // Ignore errors when getting events for verbose output
+            }
+          }
+          
+          throw new Error(errorMessage);
         }
         return result;
       },
@@ -337,6 +492,8 @@ class TestRunner {
    * Create basic matchers for non-dataLayer values
    */
   createBasicMatchers(received) {
+    const matcherContext = { isNot: false, promise: false };
+    
     return {
       toBe: (expected) => {
         if (received !== expected) {
@@ -349,13 +506,27 @@ class TestRunner {
         }
       },
       toBeTruthy: () => {
-        if (!received) {
-          throw new Error(`Expected ${received} to be truthy`);
+        const result = matchers.toBeTruthy.call(matcherContext, received);
+        if (!result.pass) {
+          throw new Error(result.message());
         }
       },
       toBeFalsy: () => {
-        if (received) {
-          throw new Error(`Expected ${received} to be falsy`);
+        const result = matchers.toBeFalsy.call(matcherContext, received);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toBeDefined: () => {
+        const result = matchers.toBeDefined.call(matcherContext, received);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toBeUndefined: () => {
+        const result = matchers.toBeUndefined.call(matcherContext, received);
+        if (!result.pass) {
+          throw new Error(result.message());
         }
       },
       toContain: (expected) => {
@@ -411,12 +582,21 @@ class TestRunner {
       // Test failed
       this.stats.failed++;
       console.log(chalk.red(`    ✗ ${name}`));
-      console.log(chalk.red(`      ${error.message}`));
+      
+      // Enhanced error handling with helpful messages
+      const enhancedError = this.enhanceErrorMessage(error);
+      console.log(chalk.red(`      ${enhancedError.message}`));
+      
+      // Show helpful tips for common errors
+      if (enhancedError.tip) {
+        console.log(chalk.yellow(`      💡 Tip: ${enhancedError.tip}`));
+      }
       
       this.failures.push({
         suite: this.currentSuite,
         test: name,
-        error: error.message,
+        error: enhancedError.message,
+        tip: enhancedError.tip,
         stack: error.stack,
       });
 
@@ -430,6 +610,68 @@ class TestRunner {
         }
       }
     }
+  }
+
+  /**
+   * Enhance error messages with helpful tips
+   */
+  enhanceErrorMessage(error) {
+    const message = error.message || '';
+    let enhancedMessage = message;
+    let tip = null;
+    
+    // Timeout errors
+    if (message.includes('Timeout') || message.includes('timeout')) {
+      if (message.includes('waiting for selector')) {
+        const selectorMatch = message.match(/waiting for selector "([^"]+)"/);
+        const selector = selectorMatch ? selectorMatch[1] : 'element';
+        
+        enhancedMessage = `Timeout waiting for element "${selector}"`;
+        tip = `Verifique se o elemento "${selector}" existe na página e se o seletor está correto. Use as ferramentas de desenvolvedor para inspecionar o elemento.`;
+      }
+      else if (message.includes('click')) {
+        enhancedMessage = 'Timeout trying to click element';
+        tip = 'Verifique se o elemento está visível e clicável. O elemento pode não ter carregado ainda ou estar coberto por outro elemento.';
+      }
+      else if (message.includes('fill') || message.includes('type')) {
+        enhancedMessage = 'Timeout trying to fill input field';
+        tip = 'Verifique se o campo de input existe e está habilitado para preenchimento.';
+      }
+      else if (message.includes('goto') || message.includes('navigation')) {
+        enhancedMessage = 'Timeout during page navigation';
+        tip = 'Verifique se a URL está correta e se o servidor está rodando. Para aplicações locais, confirme que está rodando em localhost:3000.';
+      }
+      else {
+        enhancedMessage = 'Operation timed out';
+        tip = 'A operação demorou mais que o esperado. Verifique se todos os elementos e serviços necessários estão funcionando.';
+      }
+    }
+    
+    // Element not found errors
+    else if (message.includes('Element not found') || message.includes('No element found') || message.includes('strict mode violation')) {
+      const selectorMatch = message.match(/selector "([^"]+)"/);
+      const selector = selectorMatch ? selectorMatch[1] : 'element';
+      
+      enhancedMessage = `Element "${selector}" not found`;
+      tip = `Verifique se o elemento "${selector}" existe na página. Use o inspector do navegador para confirmar o seletor correto.`;
+    }
+    
+    // Network/connection errors  
+    else if (message.includes('net::') || message.includes('ECONNREFUSED') || message.includes('Connection refused')) {
+      enhancedMessage = 'Cannot connect to the application';
+      tip = 'Verifique se sua aplicação está rodando. Para Next.js execute "npm run dev" em outro terminal.';
+    }
+    
+    // Navigation errors
+    else if (message.includes('Navigation failed') || message.includes('ERR_CONNECTION_REFUSED')) {
+      enhancedMessage = 'Failed to navigate to page';
+      tip = 'Verifique se a URL está correta e se o servidor está rodando na porta especificada.';
+    }
+    
+    return {
+      message: enhancedMessage,
+      tip: tip
+    };
   }
 
   /**
@@ -460,6 +702,9 @@ class TestRunner {
       this.failures.forEach((failure, index) => {
         console.log(chalk.red(`\n${index + 1}. ${failure.suite ? `${failure.suite} > ` : ''}${failure.test}`));
         console.log(chalk.red(`   ${failure.error}`));
+        if (failure.tip) {
+          console.log(chalk.yellow(`   💡 ${failure.tip}`));
+        }
       });
     }
 

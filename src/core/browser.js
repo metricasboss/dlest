@@ -57,10 +57,26 @@ class BrowserManager {
       await this.launch();
     }
 
-    const context = await this.browser.newContext({
+    // Handle authentication
+    const contextOptions = {
       viewport: { width: 1280, height: 720 },
       ...options
-    });
+    };
+    
+    // Add baseURL if provided in config
+    if (this.config.baseURL) {
+      contextOptions.baseURL = this.config.baseURL;
+    }
+    
+    // Add basic auth if provided in config
+    if (this.config.auth) {
+      contextOptions.httpCredentials = {
+        username: this.config.auth.username,
+        password: this.config.auth.password
+      };
+    }
+
+    const context = await this.browser.newContext(contextOptions);
 
     // Track context for cleanup
     this.contexts.add(context);

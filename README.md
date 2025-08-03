@@ -13,9 +13,12 @@ DLest provides familiar Jest-like syntax for validating data layer events in web
 - 🧪 **Jest-like API** - Familiar syntax for JavaScript developers
 - 🎯 **Purpose-built** - Designed specifically for analytics testing
 - 🚀 **Fast & Reliable** - Built on Playwright for real browser testing
+- 🌐 **Remote Testing** - Test staging/production sites directly
 - 📦 **Zero Config** - Works out of the box with sensible defaults
 - 🔧 **Extensible** - Custom matchers and templates for your needs
-- 🌐 **Built-in Server** - No need for Python or external tools
+- 🛠️ **Built-in Server** - No need for Python or external tools
+- 🔍 **Verbose Mode** - Detailed debugging with event inspection
+- 💡 **Smart Error Messages** - Helpful tips in Portuguese
 
 ## Quick Start
 
@@ -39,12 +42,23 @@ This creates:
 ### Run Tests
 
 ```bash
-# Option 1: Start server and run tests automatically
+# Test local development
+npx dlest
+
+# Test with local server
 npx dlest --serve
 
-# Option 2: Manual server + tests  
-npx dlest serve        # Start server in one terminal
-npx dlest              # Run tests in another terminal
+# Test remote URL (NEW!)
+npx dlest https://staging.example.com
+
+# Test with authentication
+npx dlest https://staging.example.com --auth-user=admin --auth-pass=senha
+
+# Verbose mode for debugging
+npx dlest --verbose
+
+# CI mode for pipelines
+npx dlest https://production.example.com --ci
 ```
 
 ## Real-World Example
@@ -59,14 +73,14 @@ test.describe('Purchase Flow', () => {
   test('complete purchase journey', async ({ page, dataLayer }) => {
     // 1. View product
     await page.goto('http://localhost:3000/products.html');
-    expect(dataLayer).toHaveEvent('view_item', {
+    await expect(dataLayer).toHaveEvent('view_item', {
       value: 99.99,
       currency: 'USD'
     });
 
     // 2. Add to cart
     await page.click('#add-to-cart');
-    expect(dataLayer).toHaveEvent('add_to_cart', {
+    await expect(dataLayer).toHaveEvent('add_to_cart', {
       value: 99.99,
       items: expect.arrayContaining([
         expect.objectContaining({
@@ -80,14 +94,14 @@ test.describe('Purchase Flow', () => {
     await page.click('#checkout');
     await page.waitForTimeout(1000); // Wait for async purchase
     
-    expect(dataLayer).toHaveEvent('purchase', {
+    await expect(dataLayer).toHaveEvent('purchase', {
       transaction_id: expect.any(String),
       value: 99.99,
       currency: 'USD'
     });
 
     // 4. Verify the complete sequence
-    expect(dataLayer).toHaveEventSequence([
+    await expect(dataLayer).toHaveEventSequence([
       'view_item',
       'add_to_cart',
       'purchase'
@@ -106,7 +120,7 @@ const { test, expect } = require('dlest');
 test('page view tracking', async ({ page, dataLayer }) => {
   await page.goto('http://localhost:3000');
   
-  expect(dataLayer).toHaveEvent('page_view');
+  await expect(dataLayer).toHaveEvent('page_view');
 });
 
 test('purchase tracking', async ({ page, dataLayer }) => {
@@ -114,7 +128,7 @@ test('purchase tracking', async ({ page, dataLayer }) => {
   await page.click('#add-to-cart');
   await page.click('#checkout');
   
-  expect(dataLayer).toHaveEvent('purchase', {
+  await expect(dataLayer).toHaveEvent('purchase', {
     transaction_id: expect.any(String),
     value: expect.any(Number),
     currency: 'BRL'
@@ -122,30 +136,68 @@ test('purchase tracking', async ({ page, dataLayer }) => {
 });
 ```
 
+## Remote Testing (NEW!)
+
+Test analytics on staging or production environments:
+
+```javascript
+// Test remote URL directly
+npx dlest https://staging.mysite.com
+
+// With authentication
+npx dlest https://staging.mysite.com --auth-user=admin --auth-pass=senha
+
+// Use environment variables
+export DLEST_BASE_URL=https://staging.mysite.com
+export DLEST_AUTH_USER=admin
+export DLEST_AUTH_PASS=senha
+npx dlest
+
+// Custom test file for remote
+npx dlest https://production.mysite.com --test=tests/production.test.js
+
+// CI/CD Pipeline
+npx dlest $STAGING_URL --ci
+```
+
+### Verbose Mode
+
+Debug with detailed event information:
+
+```bash
+npx dlest --verbose
+```
+
+Shows:
+- All captured events with full data
+- Expected vs found comparison
+- DataLayer structure analysis
+- Helpful error messages in Portuguese
+
 ## Custom Matchers
 
 DLest provides specialized matchers for data layer testing:
 
-- `toHaveEvent(eventName, eventData?)` - Check if event exists
-- `toHaveEventData(eventData)` - Check if any event contains specific data
-- `toHaveEventCount(eventName, count)` - Verify event count
-- `toHaveEventSequence(eventNames[])` - Validate event sequence
+- `await expect(dataLayer).toHaveEvent(eventName, eventData?)` - Check if event exists
+- `await expect(dataLayer).toHaveEventData(eventData)` - Check if any event contains specific data
+- `await expect(dataLayer).toHaveEventCount(eventName, count)` - Verify event count
+- `await expect(dataLayer).toHaveEventSequence(eventNames[])` - Validate event sequence
 
 ```javascript
 // Event existence
-expect(dataLayer).toHaveEvent('purchase');
+await expect(dataLayer).toHaveEvent('purchase');
 
 // Event with specific data
-expect(dataLayer).toHaveEvent('purchase', { value: 99.90 });
+await expect(dataLayer).toHaveEvent('purchase', { value: 99.90 });
 
 // Event count
-expect(dataLayer).toHaveEventCount('page_view', 1);
+await expect(dataLayer).toHaveEventCount('page_view', 1);
 
 // Event sequence
-expect(dataLayer).toHaveEventSequence(['page_view', 'add_to_cart', 'purchase']);
+await expect(dataLayer).toHaveEventSequence(['page_view', 'add_to_cart', 'purchase']);
 
 // Negation
-expect(dataLayer).not.toHaveEvent('error');
+await expect(dataLayer).not.toHaveEvent('error');
 ```
 
 ## Configuration

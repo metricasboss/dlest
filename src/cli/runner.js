@@ -29,7 +29,7 @@ class CLIRunner {
 
     // Main run command (default)
     this.program
-      .argument('[files...]', 'Test files to run')
+      .argument('[files...]', 'Test files to run or URL to test')
       .option('--config <path>', 'Path to config file')
       .option('--browser <browser>', 'Browser to use (chromium, firefox, webkit)', 'chromium')
       .option('--headless', 'Run in headless mode', true)
@@ -40,12 +40,41 @@ class CLIRunner {
       .option('--serve', 'Auto-start development server before tests')
       .option('--serve-port <port>', 'Port for development server', '3000')
       .option('--serve-root <path>', 'Root directory for development server')
+      .option('--auth-user <username>', 'Basic auth username for remote testing')
+      .option('--auth-pass <password>', 'Basic auth password for remote testing')
+      .option('--test <file>', 'Specific test file to run (for remote testing)')
+      .option('--ci', 'CI mode (no colors, proper exit codes)')
       .action(async (files, options) => {
         let server = null;
         
+        // Configure CI mode
+        if (options.ci) {
+          chalk.level = 0; // Disable colors
+          process.env.CI = 'true';
+        }
+        
         try {
-          // Start server if --serve option is provided
-          if (options.serve) {
+          // Check if first argument is a URL
+          const isRemoteTest = files.length > 0 && this.isValidUrl(files[0]);
+          
+          if (isRemoteTest) {
+            // Remote testing mode
+            const remoteUrl = files[0];
+            console.log(chalk.cyan(`🌐 Remote testing mode: ${remoteUrl}\n`));
+            
+            // Set up remote testing options
+            options.remoteUrl = remoteUrl;
+            options.testFiles = options.test ? [options.test] : [];
+            
+            // Basic auth
+            if (options.authUser && options.authPass) {
+              options.auth = {
+                username: options.authUser,
+                password: options.authPass
+              };
+            }
+          } else if (options.serve) {
+            // Start local server if --serve option is provided
             console.log(chalk.cyan('🚀 Starting development server for tests...\n'));
             
             const serverOptions = {
@@ -65,13 +94,16 @@ class CLIRunner {
 
           // Run tests
           const result = await this.commands.run({
-            testFiles: files,
+            testFiles: isRemoteTest ? options.testFiles : files,
             browser: options.browser,
             headless: options.headless,
             timeout: parseInt(options.timeout),
             verbose: options.verbose,
             config: options.config,
             baseURL: options.baseURL,
+            remoteUrl: options.remoteUrl,
+            auth: options.auth,
+            ci: options.ci,
           });
           
           // Stop server if it was started
@@ -188,6 +220,18 @@ class CLIRunner {
   }
 
   /**
+   * Check if string is a valid URL
+   */
+  isValidUrl(string) {
+    try {
+      const url = new URL(string);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /**
    * Get version from package.json
    */
   getVersion() {
@@ -214,6 +258,15 @@ class CLIRunner {
     process.on('unhandledRejection', (reason, promise) => {
       console.error(chalk.red('💥 Unhandled Rejection:'));
       console.error(chalk.red(reason));
+      
+      // Debug info
+      if (reason && reason.stack) {
+        console.error(chalk.gray('\nStack trace:'));
+        console.error(chalk.gray(reason.stack));
+      }
+      
+      console.error(chalk.gray('\nPromise:'), promise);
+      
       process.exit(1);
     });
 

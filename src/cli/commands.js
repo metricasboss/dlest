@@ -24,6 +24,17 @@ class Commands {
 
       // Load configuration
       const config = this.configLoader.load(options);
+      
+      // Handle remote URL
+      if (options.remoteUrl) {
+        config.baseURL = options.remoteUrl;
+        config.remote = true;
+        
+        // Apply auth if provided
+        if (options.auth) {
+          config.auth = options.auth;
+        }
+      }
 
       if (options.verbose) {
         console.log(chalk.gray('Configuration:'));
@@ -32,14 +43,22 @@ class Commands {
       }
 
       // Get test files
-      const testFiles = this.configLoader.getTestFiles(config, options.testFiles || []);
+      let testFiles;
       
-      if (testFiles.length === 0) {
-        console.log(chalk.yellow('⚠️  No test files found'));
-        console.log(chalk.gray(`Looked in: ${config.testDir}`));
-        console.log(chalk.gray(`Patterns: ${config.testMatch.join(', ')}`));
-        console.log(chalk.gray('\\n💡 Tip: Run `npx dlest init` to create example tests'));
-        return { success: false, stats: null };
+      if (config.remote && (!options.testFiles || options.testFiles.length === 0)) {
+        // For remote testing without specific test files, use default remote test
+        testFiles = [path.join(__dirname, '../../templates/remote-default.test.js')];
+        console.log(chalk.gray('Using default remote test template'));
+      } else {
+        testFiles = this.configLoader.getTestFiles(config, options.testFiles || []);
+        
+        if (testFiles.length === 0) {
+          console.log(chalk.yellow('⚠️  No test files found'));
+          console.log(chalk.gray(`Looked in: ${config.testDir}`));
+          console.log(chalk.gray(`Patterns: ${config.testMatch.join(', ')}`));
+          console.log(chalk.gray('\\n💡 Tip: Run `npx dlest init` to create example tests'));
+          return { success: false, stats: null };
+        }
       }
 
       console.log(chalk.gray(`Found ${testFiles.length} test file(s):`));

@@ -54,6 +54,10 @@ class TestRunner {
     } finally {
       this.stats.endTime = Date.now();
       this.printSummary();
+      
+      if (this.config.verbose) {
+        console.log(chalk.gray('\n[DEBUG] All tests completed, returning stats'));
+      }
     }
 
     return this.stats;
@@ -291,32 +295,36 @@ class TestRunner {
       verbose: this.config.verbose 
     };
     
+    // Store for sharing with .not matchers
+    let capturedEvents = null;
+    
     return {
       toHaveEvent: async (eventName, eventData) => {
         // Capture events BEFORE executing the matcher (to avoid navigation issues)
         let allEvents = [];
         let dataLayerInfo = null;
         
-        if (this.config.verbose) {
-          try {
-            allEvents = await received.getEvents();
+        // Always capture events to ensure consistency
+        try {
+          allEvents = await received.getEvents();
             
-            // Only get debug info if no events found
-            if (allEvents.length === 0) {
-              const page = await received.getPage();
-              dataLayerInfo = await page.evaluate(() => {
-                return {
-                  exists: typeof window.dataLayer !== 'undefined',
-                  isArray: Array.isArray(window.dataLayer),
-                  length: window.dataLayer ? window.dataLayer.length : 0,
-                  content: window.dataLayer ? JSON.stringify(window.dataLayer.slice(0, 5)) : null,
-                  spyExists: typeof window.__dlest_events !== 'undefined',
-                  spyLength: window.__dlest_events ? window.__dlest_events.length : 0,
-                  spyContent: window.__dlest_events ? JSON.stringify(window.__dlest_events.slice(0, 5)) : null
-                };
-              });
-            }
-          } catch (e) {
+          // Only get debug info if verbose and no events found
+          if (this.config.verbose && allEvents.length === 0) {
+            const page = await received.getPage();
+            dataLayerInfo = await page.evaluate(() => {
+              return {
+                exists: typeof window.dataLayer !== 'undefined',
+                isArray: Array.isArray(window.dataLayer),
+                length: window.dataLayer ? window.dataLayer.length : 0,
+                content: window.dataLayer ? JSON.stringify(window.dataLayer.slice(0, 5)) : null,
+                spyExists: typeof window.__dlest_events !== 'undefined',
+                spyLength: window.__dlest_events ? window.__dlest_events.length : 0,
+                spyContent: window.__dlest_events ? JSON.stringify(window.__dlest_events.slice(0, 5)) : null
+              };
+            });
+          }
+        } catch (e) {
+          if (this.config.verbose) {
             console.log(chalk.gray(`    ❌ Error getting events before test: ${e.message}`));
           }
         }
@@ -333,6 +341,9 @@ class TestRunner {
         };
         
         const result = await matchers.toHaveEvent.call(matcherContext, mockReceived, eventName, eventData);
+        
+        // Store for .not matchers
+        capturedEvents = allEvents;
         
         if (this.config.verbose) {
           console.log(chalk.gray(`    🔧 [DEBUG] Matcher result: ${result.pass ? 'PASS' : 'FAIL'}`));
@@ -478,8 +489,16 @@ class TestRunner {
       not: {
         toHaveEvent: async (eventName, eventData) => {
           const notMatcherContext = { isNot: true, promise: false };
-          const result = await matchers.toHaveEvent.call(notMatcherContext, received, eventName, eventData);
-          if (!result.pass) {
+          
+          // Use capturedEvents if available (from verbose mode), otherwise get fresh
+          const dataLayerToUse = capturedEvents ? {
+            getEvents: async () => capturedEvents,
+            getPage: received.getPage.bind(received)
+          } : received;
+          
+          const result = await matchers.toHaveEvent.call(notMatcherContext, dataLayerToUse, eventName, eventData);
+          if (result.pass) {
+            // For .not matchers, we throw when it DOES pass (because we expected it NOT to)
             throw new Error(result.message());
           }
           return result;

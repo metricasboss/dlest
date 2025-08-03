@@ -2,42 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.4.0] - 2025-01-02
 
-## [Unreleased]
+### 🚀 New Features
 
-## [0.1.0] - 2024-01-30
+- **Remote Testing**: Test analytics on staging/production environments
+  - `npx dlest https://example.com` - Test any URL directly
+  - `--auth-user` and `--auth-pass` options for basic authentication
+  - Environment variables support (DLEST_BASE_URL, DLEST_AUTH_USER, etc.)
+  - Default remote test template for quick validation
 
-### Added
-- Initial release of DLest - Jest for your data layer
-- Core test runner with Playwright integration
-- Custom matchers for data layer testing:
-  - `toHaveEvent()` - Check for specific events
-  - `toHaveEventData()` - Validate event data
-  - `toHaveEventCount()` - Verify event count
-  - `toHaveEventSequence()` - Check event order
-- Built-in static file server (Node.js)
-- CLI with commands:
-  - `dlest` - Run tests
-  - `dlest init` - Initialize project
-  - `dlest serve` - Start development server
-  - `dlest install` - Install Playwright browsers
-- Multiple test templates:
-  - `minimal` - Basic setup
-  - `basic` - Standard template (default)
-  - `spa` - Single Page Application
-  - `gtm` - Google Tag Manager
-  - `ecommerce` - E-commerce tracking
-- Configuration system with `dlest.config.js`
-- Jest-like API with `test()` and `expect()`
-- Data layer spy for event interception
-- Auto-server option with `--serve` flag
-- Organized project structure with `fixtures/` directory
+- **CI Mode**: Optimized for continuous integration pipelines
+  - `--ci` flag disables colors and ensures proper exit codes
+  - Environment-aware configuration
 
-### Security
-- Added `.gitignore` template to prevent committing sensitive files
-- Secure static server with path traversal protection
+- **Enhanced Verbose Mode**: Detailed debugging information
+  - Shows all captured events with full data
+  - Expected vs found comparison
+  - DataLayer structure analysis
+  - Event timeline with indexes
 
-[Unreleased]: https://github.com/metricasboss/dlest/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/metricasboss/dlest/releases/tag/v0.1.0
+### 🐛 Bug Fixes
+
+- Fixed async matcher issues (all matchers now require `await`)
+- Fixed verbose mode consistency between environments
+- Fixed baseURL configuration for Playwright contexts
+- Fixed unhandled promise rejections in test execution
+
+### 📝 Documentation
+
+- Updated README with remote testing examples
+- Added CI/CD pipeline examples
+- Clarified async nature of dataLayer matchers
+- Added environment variables documentation
+
+### 💅 Improvements
+
+- Better error messages with helpful tips in Portuguese
+- Consistent event capture across verbose and normal modes
+- Improved test file resolution for remote testing
+- Enhanced stack traces for debugging
+
+## [0.3.0] - 2025-01-01
+
+### 🚀 New Features
+
+- Smart error handling with contextual tips
+- Improved verbose mode output
+- Better timeout error messages
+
+## [0.2.0] - 2024-12-31
+
+### 🚀 New Features
+
+- Remove fixtures by default in `dlest init`
+- Add `--with-fixtures` option for static HTML testing
+- Intelligent .gitignore management
+- Simplified project structure
+
+## [0.1.0] - 2024-12-30
+
+### 🎉 Initial Release
+
+- Jest-like test runner for analytics
+- Playwright integration
+- Custom matchers for dataLayer testing
+- Built-in static server
+- Basic templates

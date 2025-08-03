@@ -30,6 +30,7 @@ class ConfigLoader {
       ...defaults,
       ...this.loadFromPackageJson(),
       ...this.loadFromConfigFile(),
+      ...this.loadFromEnvironment(),
       ...cliOptions,
     };
 
@@ -64,6 +65,49 @@ class ConfigLoader {
     }
     
     return {};
+  }
+
+  /**
+   * Load configuration from environment variables
+   */
+  loadFromEnvironment() {
+    const envConfig = {};
+    
+    // Base URL from environment
+    if (process.env.DLEST_BASE_URL) {
+      envConfig.baseURL = process.env.DLEST_BASE_URL;
+    }
+    
+    // Authentication from environment
+    if (process.env.DLEST_AUTH_USER && process.env.DLEST_AUTH_PASS) {
+      envConfig.auth = {
+        username: process.env.DLEST_AUTH_USER,
+        password: process.env.DLEST_AUTH_PASS
+      };
+    }
+    
+    // Browser from environment
+    if (process.env.DLEST_BROWSER) {
+      envConfig.browser = process.env.DLEST_BROWSER;
+    }
+    
+    // Headless mode from environment
+    if (process.env.DLEST_HEADLESS !== undefined) {
+      envConfig.headless = process.env.DLEST_HEADLESS !== 'false';
+    }
+    
+    // Timeout from environment
+    if (process.env.DLEST_TIMEOUT) {
+      envConfig.timeout = parseInt(process.env.DLEST_TIMEOUT);
+    }
+    
+    // CI mode from environment
+    if (process.env.CI === 'true') {
+      envConfig.ci = true;
+      envConfig.headless = true;
+    }
+    
+    return envConfig;
   }
 
   /**

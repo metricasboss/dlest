@@ -147,6 +147,24 @@ class CLIRunner {
         process.exit(result.success ? 0 : 1);
       });
 
+    // Generate command
+    this.program
+      .command('generate')
+      .description('Generate DLest test from Chrome DevTools Recorder JSON')
+      .option('--from-recording <file>', 'Chrome Recorder JSON file')
+      .option('--output <file>', 'Output test file path')
+      .option('--template <type>', 'Template to use (basic, ecommerce, form, spa)', 'auto')
+      .option('--test-name <name>', 'Custom test name')
+      .option('--min-confidence <level>', 'Minimum confidence level (low, medium, high)', 'low')
+      .option('--no-comments', 'Exclude explanatory comments')
+      .option('--no-todos', 'Exclude TODO reminders')
+      .option('--preview', 'Preview without creating file')
+      .option('--verbose', 'Verbose output')
+      .action(async (options) => {
+        const result = await this.commands.generate(options);
+        process.exit(result.success ? 0 : 1);
+      });
+
     // Serve command
     this.program
       .command('serve')
@@ -183,18 +201,27 @@ class CLIRunner {
     this.program.on('--help', () => {
       console.log('');
       console.log('Examples:');
-      console.log('  $ dlest                           # Run all tests');
-      console.log('  $ dlest tests/specific.test.js    # Run specific test');
-      console.log('  $ dlest --browser=firefox         # Use Firefox');
-      console.log('  $ dlest --no-headless             # Run with GUI');
-      console.log('  $ dlest --serve                   # Auto-start server + run tests');
-      console.log('  $ dlest serve                     # Start development server');
-      console.log('  $ dlest serve --port 8080         # Server on custom port');
-      console.log('  $ dlest init                      # Initialize project');
-      console.log('  $ dlest init --template=ecommerce # Init with e-commerce template');
+      console.log('  $ dlest                                    # Run all tests');
+      console.log('  $ dlest tests/specific.test.js             # Run specific test');
+      console.log('  $ dlest --browser=firefox                  # Use Firefox');
+      console.log('  $ dlest --no-headless                      # Run with GUI');
+      console.log('  $ dlest --serve                            # Auto-start server + run tests');
+      console.log('  $ dlest serve                              # Start development server');
+      console.log('  $ dlest serve --port 8080                  # Server on custom port');
+      console.log('  $ dlest init                               # Initialize project');
+      console.log('  $ dlest init --template=ecommerce          # Init with e-commerce template');
+      console.log('  $ dlest generate --from-recording rec.json # Generate test from Chrome Recorder');
+      console.log('  $ dlest generate --from-recording rec.json --preview # Preview without creating file');
+      console.log('  $ dlest generate --from-recording rec.json --template ecommerce # Use specific template');
       console.log('');
       console.log('Configuration:');
       console.log('  Create dlest.config.js in your project root for custom settings.');
+      console.log('');
+      console.log('Chrome DevTools Recorder:');
+      console.log('  1. Open Chrome DevTools > Recorder tab');
+      console.log('  2. Record your user journey');
+      console.log('  3. Export as JSON');
+      console.log('  4. Use "dlest generate --from-recording exported.json"');
       console.log('');
       console.log('Documentation:');
       console.log('  https://github.com/metricasboss/dlest');

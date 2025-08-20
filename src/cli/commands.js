@@ -2,6 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { ConfigLoader } = require('../config/loader');
 const { TestRunner } = require('../core/test-runner');
+const { ChromeRecorderParser } = require('../recorder/parser');
+const { AnalyticsMapper } = require('../recorder/analytics-mapper');
+const { TestGenerator } = require('../recorder/test-generator');
 const chalk = require('chalk');
 
 /**
@@ -243,6 +246,169 @@ class Commands {
         }
       });
     });
+  }
+
+  /**
+   * Generate DLest test from Chrome DevTools Recorder JSON
+   */
+  async generate(options = {}) {
+    try {
+      console.log(chalk.cyan('🤖 Generating DLest test from Chrome Recorder...\n'));
+
+      // Validate input file
+      const recordingFile = options.fromRecording;
+      if (!recordingFile) {
+        throw new Error('Recording file is required. Use --from-recording <file.json>');
+      }
+
+      if (!fs.existsSync(recordingFile)) {
+        throw new Error(`Recording file not found: ${recordingFile}`);
+      }
+
+      // Read and parse recording
+      console.log(chalk.gray(`📖 Reading recording from: ${recordingFile}`));
+      const recordingContent = fs.readFileSync(recordingFile, 'utf8');
+      
+      const parser = new ChromeRecorderParser();
+      const parsedRecording = parser.parseRecording(recordingContent);
+      
+      console.log(chalk.green(`✅ Parsed ${parsedRecording.processedSteps.length} steps from recording`));
+      
+      // Map to analytics events
+      console.log(chalk.gray('🔍 Analyzing user journey for analytics patterns...'));
+      const analyticsMapper = new AnalyticsMapper();
+      const analyticsMapping = analyticsMapper.mapStepsToEvents(
+        parsedRecording.processedSteps, 
+        parsedRecording.metadata
+      );
+      
+      console.log(chalk.green(`✅ Identified ${analyticsMapping.summary.totalEvents} potential analytics events`));
+      console.log(chalk.gray(`   Journey type: ${analyticsMapping.journeyType.primary} (${analyticsMapping.journeyType.confidence} confidence)`));
+      
+      // Generate test
+      console.log(chalk.gray('⚙️  Generating DLest test code...'));
+      const testGenerator = new TestGenerator();
+      
+      const generatorOptions = {
+        testName: options.testName,
+        template: options.template,
+        minConfidence: options.minConfidence || 'low',
+        includeComments: options.includeComments !== false,
+        includeTodos: options.includeTodos !== false,
+        verbose: options.verbose || false
+      };
+      
+      if (options.preview) {
+        // Preview mode - don't create file
+        const preview = testGenerator.generatePreview(parsedRecording, analyticsMapping, generatorOptions);
+        this.displayPreview(preview);
+        return { success: true, preview };
+      } else {
+        // Generate full test
+        const result = testGenerator.generateTest(parsedRecording, analyticsMapping, generatorOptions);
+        
+        // Determine output file
+        const outputFile = options.output || path.join(process.cwd(), 'tests', result.filename);
+        const outputDir = path.dirname(outputFile);
+        
+        // Ensure output directory exists
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+          console.log(chalk.green(`✅ Created directory: ${path.relative(process.cwd(), outputDir)}`));
+        }
+        
+        // Write test file
+        fs.writeFileSync(outputFile, result.testCode, 'utf8');
+        console.log(chalk.green(`✅ Generated test file: ${path.relative(process.cwd(), outputFile)}`));
+        
+        // Display summary
+        this.displayGenerationSummary(result, analyticsMapping);
+        
+        // Display suggestions
+        if (result.suggestions.length > 0) {
+          console.log(chalk.yellow('\n💡 Suggestions for improvement:'));
+          result.suggestions.forEach((suggestion, index) => {
+            console.log(chalk.yellow(`   ${index + 1}. ${suggestion.message}`));
+          });
+        }
+        
+        console.log(chalk.cyan('\n🎉 Test generation completed!'));
+        console.log(chalk.gray('\nNext steps:'));
+        console.log(chalk.gray('  1. Review the generated test and adjust expected events'));
+        console.log(chalk.gray('  2. Update selectors if they seem fragile'));
+        console.log(chalk.gray(`  3. Run the test: npx dlest ${path.relative(process.cwd(), outputFile)}`));
+        
+        return { success: true, outputFile, metadata: result.metadata };
+      }
+
+    } catch (error) {
+      console.error(chalk.red('❌ Error generating test:'));
+      console.error(chalk.red(error.message));
+      
+      if (options.verbose && error.stack) {
+        console.error(chalk.gray(error.stack));
+      }
+      
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Display preview of generated test
+   */
+  displayPreview(preview) {
+    console.log(chalk.cyan('\n📋 Test Generation Preview'));
+    console.log(chalk.cyan('─'.repeat(50)));
+    
+    console.log(chalk.white(`Title: ${preview.summary.title}`));
+    console.log(chalk.gray(`Steps: ${preview.summary.stepsCount}`));
+    console.log(chalk.gray(`Events: ${preview.summary.eventsCount}`));
+    console.log(chalk.gray(`Journey: ${preview.summary.journeyType} (${preview.summary.confidence})`));
+    console.log(chalk.gray(`Template: ${preview.summary.recommendedTemplate}`));
+    console.log(chalk.gray(`Filename: ${preview.summary.filename}`));
+    
+    console.log(chalk.cyan('\n📝 Steps Overview:'));
+    preview.steps.forEach((step, index) => {
+      const eventsList = step.expectedEvents.length > 0 
+        ? ` → ${step.expectedEvents.join(', ')}` 
+        : ' → (no events)';
+      console.log(chalk.gray(`   ${step.step}. ${step.description}${eventsList}`));
+    });
+    
+    if (preview.suggestions.length > 0) {
+      console.log(chalk.yellow('\n💡 Suggestions:'));
+      preview.suggestions.forEach((suggestion, index) => {
+        console.log(chalk.yellow(`   ${index + 1}. ${suggestion.message}`));
+      });
+    }
+    
+    console.log(chalk.cyan('\n💡 Use --output to specify file location, or remove --preview to generate'));
+  }
+
+  /**
+   * Display generation summary
+   */
+  displayGenerationSummary(result, analyticsMapping) {
+    console.log(chalk.cyan('\n📊 Generation Summary'));
+    console.log(chalk.cyan('─'.repeat(50)));
+    
+    console.log(chalk.gray(`Original title: ${result.metadata.originalTitle}`));
+    console.log(chalk.gray(`Steps processed: ${result.metadata.stepsCount}`));
+    console.log(chalk.gray(`Events generated: ${result.metadata.eventsCount}`));
+    console.log(chalk.gray(`Journey type: ${result.metadata.journeyType} (${result.metadata.confidence})`));
+    console.log(chalk.gray(`Template used: ${result.metadata.template}`));
+    
+    const eventTypes = analyticsMapping.summary.eventTypes;
+    if (eventTypes.length > 0) {
+      console.log(chalk.gray(`Event types: ${eventTypes.join(', ')}`));
+    }
+    
+    const highConfidence = analyticsMapping.summary.highConfidenceEvents;
+    const total = analyticsMapping.summary.totalEvents;
+    if (total > 0) {
+      const ratio = Math.round((highConfidence / total) * 100);
+      console.log(chalk.gray(`High confidence events: ${highConfidence}/${total} (${ratio}%)`));
+    }
   }
 
   /**

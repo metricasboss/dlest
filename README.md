@@ -3,6 +3,7 @@
 [![npm version](https://badge.fury.io/js/dlest.svg)](https://www.npmjs.com/package/dlest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/dlest.svg)](https://nodejs.org)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://metricasboss.github.io/dlest/)
 
 **Jest for your data layer** - A test runner specifically designed for testing analytics tracking implementations.
 
@@ -60,6 +61,17 @@ npx dlest --verbose
 # CI mode for pipelines
 npx dlest https://production.example.com --ci
 ```
+
+## 📚 Documentation
+
+**Complete documentation is available at: [metricasboss.github.io/dlest](https://metricasboss.github.io/dlest/)**
+
+- **[Getting Started](https://metricasboss.github.io/dlest/getting-started/installation)** - Installation and setup guide
+- **[Writing Tests](https://metricasboss.github.io/dlest/guides/writing-tests)** - Complete guide to writing analytics tests
+- **[API Reference](https://metricasboss.github.io/dlest/api/matchers)** - All available matchers and APIs
+- **[Remote Testing](https://metricasboss.github.io/dlest/guides/remote-testing)** - Test staging and production environments
+- **[Network Validation](https://metricasboss.github.io/dlest/guides/network-validation)** - GA4 network request validation
+- **[Examples](https://metricasboss.github.io/dlest/examples/ecommerce)** - Real-world usage examples
 
 ## Real-World Example
 
@@ -405,9 +417,10 @@ npm run dev
 
 ## Support
 
-- 📚 [Documentation](https://github.com/metricasboss/dlest#readme)
+- 📚 [Documentation](https://metricasboss.github.io/dlest/)
 - 🐛 [Issue Tracker](https://github.com/metricasboss/dlest/issues)
 - 💬 [Discussions](https://github.com/metricasboss/dlest/discussions)
+- 📦 [npm Package](https://www.npmjs.com/package/dlest)
 
 ## License
 

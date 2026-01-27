@@ -5,12 +5,16 @@
 Deploy the documentation site to GitHub Pages:
 
 ```bash
-# From project root
-npm run docs:deploy
+# First time only - use gh-pages package
+cd website
+npx gh-pages -d build -b gh-pages
 
-# Or from website directory
+# After first deploy - can use Docusaurus command
 cd website
 USE_SSH=true npm run deploy
+
+# Or from project root
+npm run docs:deploy
 ```
 
 ## First Time Setup

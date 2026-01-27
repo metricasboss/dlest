@@ -101,12 +101,12 @@ class TestRunner {
    * Create test execution context
    */
   async createTestContext() {
-    const { page, context } = await this.browserManager.createPage();
+    const { page, context, networkSpy } = await this.browserManager.createPage();
     const dataLayer = this.browserManager.createDataLayerProxy(page);
 
     // Setup expect with custom matchers
-    const expect = this.createExpectFunction(dataLayer);
-    
+    const expect = this.createExpectFunction(dataLayer, networkSpy);
+
     // Test functions
     const testFunctions = {
       test: this.createTestFunction(),
@@ -122,6 +122,7 @@ class TestRunner {
       page,
       context,
       dataLayer,
+      network: networkSpy, // Expose network spy as 'network'
       testFunctions,
       cleanup: async () => {
         try {
@@ -237,13 +238,18 @@ class TestRunner {
   /**
    * Create expect function with custom matchers
    */
-  createExpectFunction(dataLayer) {
+  createExpectFunction(dataLayer, networkSpy) {
     const expect = (received) => {
       // If received is the dataLayer, return enhanced matcher
       if (received === dataLayer) {
         return this.createDataLayerMatchers(received);
       }
-      
+
+      // If received is the network spy, return network matchers
+      if (received === networkSpy) {
+        return this.createNetworkMatchers(received);
+      }
+
       // Basic expect functionality for other values
       return this.createBasicMatchers(received);
     };
@@ -289,16 +295,20 @@ class TestRunner {
    * Create DataLayer-specific matchers
    */
   createDataLayerMatchers(received) {
-    const matcherContext = { 
-      isNot: false, 
+    const matcherContext = {
+      isNot: false,
       promise: false,
-      verbose: this.config.verbose 
+      verbose: this.config.verbose
     };
-    
+
     // Store for sharing with .not matchers
     let capturedEvents = null;
-    
+
+    // Include basic matchers along with dataLayer-specific ones
+    const basicMatchers = this.createBasicMatchers(received);
+
     return {
+      ...basicMatchers,
       toHaveEvent: async (eventName, eventData) => {
         // Capture events BEFORE executing the matcher (to avoid navigation issues)
         let allEvents = [];
@@ -508,15 +518,56 @@ class TestRunner {
   }
 
   /**
+   * Create Network-specific matchers
+   */
+  createNetworkMatchers(received) {
+    const matcherContext = {
+      isNot: false,
+      promise: false,
+      verbose: this.config.verbose
+    };
+
+    // Include basic matchers along with network-specific ones
+    const basicMatchers = this.createBasicMatchers(received);
+
+    return {
+      ...basicMatchers,
+      toHaveGA4Event: async (eventName, options) => {
+        const result = await matchers.toHaveGA4Event.call(matcherContext, received, eventName, options);
+
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+
+        // If verbose, print debug info even on success
+        if (this.config.verbose && result.pass) {
+          console.log(chalk.gray(`    ✓ GA4 event "${eventName}" captured and validated`));
+        }
+      },
+
+      not: {
+        toHaveGA4Event: async (eventName) => {
+          const result = await matchers.toHaveGA4Event.negated.call(matcherContext, received, eventName);
+
+          if (!result.pass) {
+            throw new Error(result.message());
+          }
+        }
+      }
+    };
+  }
+
+  /**
    * Create basic matchers for non-dataLayer values
    */
   createBasicMatchers(received) {
     const matcherContext = { isNot: false, promise: false };
-    
+
     return {
       toBe: (expected) => {
-        if (received !== expected) {
-          throw new Error(`Expected ${received} to be ${expected}`);
+        const result = matchers.toBe.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
         }
       },
       toEqual: (expected) => {
@@ -548,17 +599,46 @@ class TestRunner {
           throw new Error(result.message());
         }
       },
+      toBeGreaterThan: (expected) => {
+        const result = matchers.toBeGreaterThan.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toBeLessThan: (expected) => {
+        const result = matchers.toBeLessThan.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toHaveLength: (expected) => {
+        const result = matchers.toHaveLength.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toHaveProperty: (property, value) => {
+        const result = matchers.toHaveProperty.call(matcherContext, received, property, value);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
       toContain: (expected) => {
-        if (typeof received === 'string') {
-          if (!received.includes(expected)) {
-            throw new Error(`Expected "${received}" to contain "${expected}"`);
-          }
-        } else if (Array.isArray(received)) {
-          if (!received.includes(expected)) {
-            throw new Error(`Expected [${received.join(', ')}] to contain ${expected}`);
-          }
-        } else {
-          throw new Error(`Expected ${received} to be a string or array for toContain matcher`);
+        const result = matchers.toContain.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toMatch: (expected) => {
+        const result = matchers.toMatch.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
+        }
+      },
+      toThrow: (expected) => {
+        const result = matchers.toThrow.call(matcherContext, received, expected);
+        if (!result.pass) {
+          throw new Error(result.message());
         }
       },
     };
@@ -574,12 +654,14 @@ class TestRunner {
     const testContext = {
       page: this.currentContext.page,
       dataLayer: this.currentContext.dataLayer,
+      network: this.currentContext.network,
     };
 
     // Make context available globally
     global.expect = this.currentContext.testFunctions.expect;
     global.page = testContext.page;
     global.dataLayer = testContext.dataLayer;
+    global.network = testContext.network;
 
     try {
       // Run beforeEach if defined

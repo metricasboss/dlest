@@ -1,6 +1,7 @@
 const { chromium, firefox, webkit } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const NetworkSpy = require('./network-spy');
 
 /**
  * Browser Wrapper
@@ -10,15 +11,26 @@ const path = require('path');
 
 class BrowserManager {
   constructor(config = {}) {
-    this.config = {
+    // Default configuration
+    const defaults = {
       headless: true,
       browser: 'chromium',
       timeout: 30000,
       dataLayer: {
         variableName: 'dataLayer',
         waitTimeout: 5000,
-      },
-      ...config
+      }
+    };
+
+    // Merge with provided config, ensuring config overrides defaults
+    this.config = {
+      ...defaults,
+      ...config,
+      // Ensure nested dataLayer config is properly merged
+      dataLayer: {
+        ...defaults.dataLayer,
+        ...(config.dataLayer || {})
+      }
     };
     
     this.browser = null;
@@ -34,7 +46,10 @@ class BrowserManager {
     }
 
     const browserType = this._getBrowserType();
-    
+
+    // Log browser configuration for debugging
+    console.log(`🌐 Launching ${this.config.browser} browser (headless: ${this.config.headless})`);
+
     this.browser = await browserType.launch({
       headless: this.config.headless,
       // Add common browser args for testing
@@ -97,7 +112,14 @@ class BrowserManager {
     // Set default timeout
     page.setDefaultTimeout(this.config.timeout);
 
-    return { page, context };
+    // Create and initialize NetworkSpy if GA4 validation is enabled
+    let networkSpy = null;
+    if (this.config.ga4Validation !== false) { // Enable by default
+      networkSpy = new NetworkSpy(page);
+      await networkSpy.startListening();
+    }
+
+    return { page, context, networkSpy };
   }
 
   /**

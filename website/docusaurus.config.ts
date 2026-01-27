@@ -99,7 +99,6 @@ const config: Config = {
           position: 'left',
           label: 'API',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://www.npmjs.com/package/dlest',
           label: 'npm',
@@ -150,7 +149,7 @@ const config: Config = {
           items: [
             {
               label: 'Blog',
-              to: '/blog',
+              href: 'https://metricasboss.com.br/blog-de-web-analytics',
             },
             {
               label: 'GitHub',

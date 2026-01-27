@@ -24,6 +24,8 @@ const config: Config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'metricasboss', // Usually your GitHub org/user name.
   projectName: 'dlest', // Usually your repo name.
+  deploymentBranch: 'gh-pages', // Branch for deployment
+  trailingSlash: false, // GitHub Pages compatibility
 
   onBrokenLinks: 'throw',
 

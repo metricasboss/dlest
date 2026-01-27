@@ -20,7 +20,8 @@
     "changelog": "echo 'Update CHANGELOG.md manually'",
     "docs:start": "cd website && npm start",
     "docs:build": "cd website && npm run build",
-    "docs:serve": "cd website && npm run serve"
+    "docs:serve": "cd website && npm run serve",
+    "docs:deploy": "cd website && npm run deploy"
   },
   "keywords": [
     "testing",

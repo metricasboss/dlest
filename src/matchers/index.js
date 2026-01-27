@@ -1,5 +1,6 @@
 const { toHaveEvent } = require('./toHaveEvent');
 const { toHaveEventData } = require('./toHaveEventData');
+const toHaveGA4Event = require('./toHaveGA4Event');
 const { matcherHint, printReceived, printExpected } = require('jest-matcher-utils');
 
 /**
@@ -240,6 +241,198 @@ function toBeFalsy(received) {
 }
 
 /**
+ * toBe Matcher
+ * Basic strict equality matcher
+ */
+function toBe(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBe', 'received', 'expected', { isNot });
+  const pass = Object.is(received, expected);
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected value not to be: ${printExpected(expected)}\nReceived: ${printReceived(received)}`
+        : `Expected: ${printExpected(expected)}\nReceived: ${printReceived(received)}`),
+  };
+}
+
+/**
+ * toBeGreaterThan Matcher
+ */
+function toBeGreaterThan(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeGreaterThan', 'received', 'expected', { isNot });
+  const pass = received > expected;
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected ${printReceived(received)} not to be greater than ${printExpected(expected)}`
+        : `Expected ${printReceived(received)} to be greater than ${printExpected(expected)}`),
+  };
+}
+
+/**
+ * toBeLessThan Matcher
+ */
+function toBeLessThan(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toBeLessThan', 'received', 'expected', { isNot });
+  const pass = received < expected;
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected ${printReceived(received)} not to be less than ${printExpected(expected)}`
+        : `Expected ${printReceived(received)} to be less than ${printExpected(expected)}`),
+  };
+}
+
+/**
+ * toHaveLength Matcher
+ */
+function toHaveLength(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toHaveLength', 'received', 'expected', { isNot });
+
+  if (!received || typeof received.length !== 'number') {
+    throw new Error(hint + '\n\nReceived value must have a length property');
+  }
+
+  const pass = received.length === expected;
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected value not to have length: ${printExpected(expected)}\nReceived length: ${printReceived(received.length)}`
+        : `Expected length: ${printExpected(expected)}\nReceived length: ${printReceived(received.length)}`),
+  };
+}
+
+/**
+ * toHaveProperty Matcher
+ */
+function toHaveProperty(received, property, value) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toHaveProperty', 'received', 'property', { isNot });
+
+  const hasProperty = received && Object.prototype.hasOwnProperty.call(received, property);
+  const pass = value !== undefined ? (hasProperty && received[property] === value) : hasProperty;
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected object not to have property: ${printExpected(property)}` + (value !== undefined ? ` with value ${printExpected(value)}` : '')
+        : `Expected object to have property: ${printExpected(property)}` + (value !== undefined ? ` with value ${printExpected(value)}` : '')),
+  };
+}
+
+/**
+ * toContain Matcher
+ */
+function toContain(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toContain', 'received', 'expected', { isNot });
+
+  let pass = false;
+  if (typeof received === 'string') {
+    pass = received.includes(expected);
+  } else if (Array.isArray(received)) {
+    pass = received.includes(expected);
+  } else {
+    throw new Error(hint + '\n\nReceived value must be a string or array');
+  }
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected ${printReceived(received)} not to contain ${printExpected(expected)}`
+        : `Expected ${printReceived(received)} to contain ${printExpected(expected)}`),
+  };
+}
+
+/**
+ * toMatch Matcher
+ */
+function toMatch(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toMatch', 'received', 'expected', { isNot });
+
+  if (typeof received !== 'string') {
+    throw new Error(hint + '\n\nReceived value must be a string');
+  }
+
+  const regex = expected instanceof RegExp ? expected : new RegExp(expected);
+  const pass = regex.test(received);
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected ${printReceived(received)} not to match ${printExpected(expected)}`
+        : `Expected ${printReceived(received)} to match ${printExpected(expected)}`),
+  };
+}
+
+/**
+ * toThrow Matcher
+ */
+function toThrow(received, expected) {
+  const isNot = this.isNot || false;
+  const hint = matcherHint('toThrow', 'received', 'expected', { isNot });
+
+  if (typeof received !== 'function') {
+    throw new Error(hint + '\n\nReceived value must be a function');
+  }
+
+  let didThrow = false;
+  let thrownError = null;
+
+  try {
+    received();
+  } catch (error) {
+    didThrow = true;
+    thrownError = error;
+  }
+
+  let pass = didThrow;
+
+  if (expected && didThrow) {
+    if (typeof expected === 'string') {
+      pass = thrownError.message.includes(expected);
+    } else if (expected instanceof RegExp) {
+      pass = expected.test(thrownError.message);
+    } else if (typeof expected === 'function') {
+      pass = thrownError instanceof expected;
+    }
+  }
+
+  return {
+    pass,
+    message: () =>
+      hint + '\n\n' +
+      (pass
+        ? `Expected function not to throw${expected ? ` ${printExpected(expected)}` : ''}`
+        : `Expected function to throw${expected ? ` ${printExpected(expected)}` : ''}\n` +
+          (didThrow ? `Threw: ${printReceived(thrownError.message)}` : 'Did not throw')),
+  };
+}
+
+/**
  * All DLest custom matchers
  */
 const matchers = {
@@ -247,10 +440,19 @@ const matchers = {
   toHaveEventData,
   toHaveEventCount,
   toHaveEventSequence,
+  toHaveGA4Event,
   toBeDefined,
   toBeUndefined,
   toBeTruthy,
   toBeFalsy,
+  toBe,
+  toBeGreaterThan,
+  toBeLessThan,
+  toHaveLength,
+  toHaveProperty,
+  toContain,
+  toMatch,
+  toThrow,
 };
 
 module.exports = matchers;

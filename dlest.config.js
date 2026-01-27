@@ -5,7 +5,7 @@ module.exports = {
   
   // Browser settings
   browsers: ['chromium'], // chromium, firefox, webkit
-  headless: true,
+  headless: false, // Set to false to see browser in action
   
   // Test settings
   timeout: 30000,

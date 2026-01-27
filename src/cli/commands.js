@@ -39,7 +39,9 @@ class Commands {
         }
       }
 
-      if (options.verbose) {
+      // Set verbose environment variable for tests
+      if (options.verbose || config.verbose) {
+        process.env.DLEST_VERBOSE = 'true';
         console.log(chalk.gray('Configuration:'));
         console.log(chalk.gray(JSON.stringify(config, null, 2)));
         console.log('');

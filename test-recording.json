@@ -1,0 +1,246 @@
+{
+    "title": "Jornada de compra",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1751,
+            "height": 572,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://www.integralmedica.com.br/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.integralmedica.com.br/",
+                    "title": "Integralmedica | Compre os Melhores Suplementos Online"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Um pote de creatina da Integralmédica"
+                ],
+                [
+                    "div:nth-of-type(7) img.integralmedica-store-components-1-x-itemImage"
+                ],
+                [
+                    "xpath///*[@data-testid=\"slider-track\"]/div[7]/div/a/img[2]"
+                ],
+                [
+                    "pierce/div:nth-of-type(7) img.integralmedica-store-components-1-x-itemImage"
+                ]
+            ],
+            "offsetY": 131.86187744140625,
+            "offsetX": 108.5789794921875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Close",
+                    "aria/[role=\"graphics-symbol\"]"
+                ],
+                [
+                    "div.ins-preview-wrapper path"
+                ],
+                [
+                    "xpath///*[@id=\"close-button-1454703513200\"]/svg/path"
+                ],
+                [
+                    "pierce/div.ins-preview-wrapper path"
+                ]
+            ],
+            "offsetY": 5.833335876464844,
+            "offsetX": 5.1302490234375
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#gallery-layout-container > div:nth-of-type(1) img.w-100"
+                ],
+                [
+                    "xpath///*[@id=\"gallery-layout-container\"]/div[1]/section/a/article/div/div/div[1]/div/div[2]/div/div/div/img[2]"
+                ],
+                [
+                    "pierce/#gallery-layout-container > div:nth-of-type(1) img.w-100"
+                ]
+            ],
+            "offsetY": 167.15234375,
+            "offsetX": 124.7750244140625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(5) > div > div > div:nth-of-type(1) > div > div > div:nth-of-type(2) > button"
+                ],
+                [
+                    "xpath//html/body/div[2]/div/div[1]/div/div/div/div[3]/div/div[1]/div/div/div[5]/div/div/div[3]/div/div[5]/div/div/div[1]/div/div/div[2]/button"
+                ],
+                [
+                    "pierce/div:nth-of-type(5) > div > div > div:nth-of-type(1) > div > div > div:nth-of-type(2) > button"
+                ]
+            ],
+            "offsetY": 15.78125,
+            "offsetX": 120.375
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Finalizar compra"
+                ],
+                [
+                    "a.integralmedica-store-components-1-x-goToCheckoutButton"
+                ],
+                [
+                    "xpath//html/body/div[12]/div/div[2]/div/div[2]/div[3]/div/div/div/div/div/div/div[3]/a[2]"
+                ],
+                [
+                    "pierce/a.integralmedica-store-components-1-x-goToCheckoutButton"
+                ],
+                [
+                    "text/Finalizar compra"
+                ]
+            ],
+            "offsetY": 38,
+            "offsetX": 76.984375,
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.integralmedica.com.br/checkout/#/cart",
+                    "title": ""
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Finalizar CompraContinuar pagamento"
+                ],
+                [
+                    "#cart-to-orderform"
+                ],
+                [
+                    "xpath///*[@id=\"cart-to-orderform\"]"
+                ],
+                [
+                    "pierce/#cart-to-orderform"
+                ],
+                [
+                    "text/Continuar pagamento"
+                ]
+            ],
+            "offsetY": 41,
+            "offsetX": 107.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Revisei e meus dados estão corretos"
+                ],
+                [
+                    "#finish-data-review"
+                ],
+                [
+                    "xpath///*[@id=\"finish-data-review\"]"
+                ],
+                [
+                    "pierce/#finish-data-review"
+                ],
+                [
+                    "text/Revisei e meus"
+                ]
+            ],
+            "offsetY": 23,
+            "offsetX": 362
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Boleto bancário - Ganhe 3% Off"
+                ],
+                [
+                    "#payment-group-bankInvoicePaymentGroup"
+                ],
+                [
+                    "xpath///*[@id=\"payment-group-bankInvoicePaymentGroup\"]"
+                ],
+                [
+                    "pierce/#payment-group-bankInvoicePaymentGroup"
+                ]
+            ],
+            "offsetY": 23.546875,
+            "offsetX": 299.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Finalizar compra"
+                ],
+                [
+                    "button:nth-of-type(3)"
+                ],
+                [
+                    "xpath///*[@id=\"payment-data-submit\"]"
+                ],
+                [
+                    "pierce/button:nth-of-type(3)"
+                ]
+            ],
+            "offsetY": 33.5625,
+            "offsetX": 193.703125,
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.integralmedica.com.br/checkout/orderPlaced/?og=1555342685212",
+                    "title": ""
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Entendi"
+                ],
+                [
+                    "#close-fraud-alert-bottom"
+                ],
+                [
+                    "xpath///*[@id=\"close-fraud-alert-bottom\"]"
+                ],
+                [
+                    "pierce/#close-fraud-alert-bottom"
+                ],
+                [
+                    "text/Entendi"
+                ]
+            ],
+            "offsetY": 14.21875,
+            "offsetX": 325
+        }
+    ]
+}

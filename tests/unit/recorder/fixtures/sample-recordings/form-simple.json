@@ -1,0 +1,53 @@
+{
+  "title": "Contact Form Submission",
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://example.com/contact"
+    },
+    {
+      "type": "setViewport",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "type": "fill",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=\"name-input\"]"],
+        ["#name"],
+        ["input[name=\"name\"]"]
+      ],
+      "value": "John Doe"
+    },
+    {
+      "type": "fill",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=\"email-input\"]"],
+        ["#email"],
+        ["input[type=\"email\"]"]
+      ],
+      "value": "john@example.com"
+    },
+    {
+      "type": "fill",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=\"message-textarea\"]"],
+        ["#message"],
+        ["textarea[name=\"message\"]"]
+      ],
+      "value": "Hello, I would like to get in touch."
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Enviar mensagem"],
+        ["[data-testid=\"submit-btn\"]"],
+        ["button[type=\"submit\"]"]
+      ]
+    }
+  ]
+}

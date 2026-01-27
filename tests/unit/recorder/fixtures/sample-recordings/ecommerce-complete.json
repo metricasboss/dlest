@@ -1,0 +1,105 @@
+{
+  "title": "E-commerce Complete Flow",
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://example-store.com/products/smartphone",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://example-store.com/products/smartphone",
+          "title": "Smartphone - Example Store"
+        }
+      ]
+    },
+    {
+      "type": "setViewport",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Smartphone Pro"],
+        ["[data-testid=\"product-image\"]"],
+        ["#product-image-123"]
+      ],
+      "offsetX": 100,
+      "offsetY": 50
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Adicionar ao carrinho"],
+        ["[data-testid=\"add-to-cart\"]"],
+        ["#add-to-cart-btn"]
+      ],
+      "offsetX": 75,
+      "offsetY": 25
+    },
+    {
+      "type": "waitForElement",
+      "selectors": [
+        [".cart-notification"]
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Finalizar compra"],
+        ["[data-testid=\"checkout-btn\"]"],
+        [".checkout-button"]
+      ]
+    },
+    {
+      "type": "navigate",
+      "url": "https://example-store.com/checkout",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://example-store.com/checkout"
+        }
+      ]
+    },
+    {
+      "type": "fill",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=\"email-input\"]"],
+        ["#email"]
+      ],
+      "value": "customer@example.com"
+    },
+    {
+      "type": "fill",
+      "target": "main",
+      "selectors": [
+        ["[data-testid=\"card-number\"]"],
+        ["#card-number"]
+      ],
+      "value": "4111111111111111"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Finalizar compra"],
+        ["[data-testid=\"complete-purchase\"]"],
+        ["#payment-data-submit"]
+      ]
+    },
+    {
+      "type": "navigate",
+      "url": "https://example-store.com/orderPlaced",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://example-store.com/orderPlaced"
+        }
+      ]
+    }
+  ]
+}

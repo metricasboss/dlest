@@ -1,0 +1,47 @@
+{
+  "title": "SPA Navigation Flow",
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://spa-app.com/"
+    },
+    {
+      "type": "setViewport",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Products"],
+        ["[data-route=\"/products\"]"],
+        ["a[href=\"/products\"]"]
+      ]
+    },
+    {
+      "type": "waitForElement",
+      "selectors": [
+        [".products-page"]
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/About Us"],
+        ["[data-route=\"/about\"]"],
+        ["nav a[href=\"/about\"]"]
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Contact"],
+        ["[data-route=\"/contact\"]"],
+        [".nav-link[href=\"/contact\"]"]
+      ]
+    }
+  ]
+}

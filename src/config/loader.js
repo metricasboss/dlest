@@ -72,12 +72,12 @@ class ConfigLoader {
    */
   loadFromEnvironment() {
     const envConfig = {};
-    
+
     // Base URL from environment
     if (process.env.DLEST_BASE_URL) {
       envConfig.baseURL = process.env.DLEST_BASE_URL;
     }
-    
+
     // Authentication from environment
     if (process.env.DLEST_AUTH_USER && process.env.DLEST_AUTH_PASS) {
       envConfig.auth = {
@@ -85,28 +85,81 @@ class ConfigLoader {
         password: process.env.DLEST_AUTH_PASS
       };
     }
-    
+
     // Browser from environment
     if (process.env.DLEST_BROWSER) {
       envConfig.browser = process.env.DLEST_BROWSER;
     }
-    
+
     // Headless mode from environment
     if (process.env.DLEST_HEADLESS !== undefined) {
       envConfig.headless = process.env.DLEST_HEADLESS !== 'false';
     }
-    
+
     // Timeout from environment
     if (process.env.DLEST_TIMEOUT) {
       envConfig.timeout = parseInt(process.env.DLEST_TIMEOUT);
     }
-    
+
     // CI mode from environment
     if (process.env.CI === 'true') {
       envConfig.ci = true;
       envConfig.headless = true;
     }
-    
+
+    // Export configuration from environment
+    if (process.env.DLEST_EXPORT_ENABLED) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.enabled = process.env.DLEST_EXPORT_ENABLED === 'true';
+    }
+
+    if (process.env.DLEST_EXPORT_PROVIDER) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.provider = process.env.DLEST_EXPORT_PROVIDER;
+    }
+
+    // S3 configuration from environment
+    if (process.env.DLEST_EXPORT_S3_BUCKET) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.s3 = envConfig.export.s3 || {};
+      envConfig.export.s3.bucket = process.env.DLEST_EXPORT_S3_BUCKET;
+    }
+
+    if (process.env.DLEST_EXPORT_S3_REGION) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.s3 = envConfig.export.s3 || {};
+      envConfig.export.s3.region = process.env.DLEST_EXPORT_S3_REGION;
+    }
+
+    if (process.env.DLEST_EXPORT_S3_ACCESS_KEY_ID && process.env.DLEST_EXPORT_S3_SECRET_ACCESS_KEY) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.s3 = envConfig.export.s3 || {};
+      envConfig.export.s3.credentials = {
+        accessKeyId: process.env.DLEST_EXPORT_S3_ACCESS_KEY_ID,
+        secretAccessKey: process.env.DLEST_EXPORT_S3_SECRET_ACCESS_KEY
+      };
+    }
+
+    // GCS configuration from environment
+    if (process.env.DLEST_EXPORT_GCS_BUCKET) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.gcs = envConfig.export.gcs || {};
+      envConfig.export.gcs.bucket = process.env.DLEST_EXPORT_GCS_BUCKET;
+    }
+
+    if (process.env.DLEST_EXPORT_GCS_PROJECT_ID) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.gcs = envConfig.export.gcs || {};
+      envConfig.export.gcs.projectId = process.env.DLEST_EXPORT_GCS_PROJECT_ID;
+    }
+
+    // File naming pattern from environment
+    if (process.env.DLEST_EXPORT_FILE_PATTERN) {
+      envConfig.export = envConfig.export || {};
+      envConfig.export.fileNaming = envConfig.export.fileNaming || {};
+      envConfig.export.fileNaming.pattern = process.env.DLEST_EXPORT_FILE_PATTERN;
+    }
+
     return envConfig;
   }
 
@@ -123,14 +176,17 @@ class ConfigLoader {
 
     for (const configPath of configPaths) {
       const fullPath = path.join(this.cwd, configPath);
-      
+
       try {
         if (fs.existsSync(fullPath)) {
           // Clear require cache to allow config reloading
           delete require.cache[path.resolve(fullPath)];
-          
+
           const config = require(fullPath);
-          
+
+          // Check for security warnings
+          this.checkConfigSecurity(config, configPath);
+
           // Handle both module.exports and export default
           return typeof config === 'function' ? config() : config;
         }
@@ -140,6 +196,27 @@ class ConfigLoader {
     }
 
     return {};
+  }
+
+  /**
+   * Check for security issues in config
+   */
+  checkConfigSecurity(config, configPath) {
+    const chalk = require('chalk');
+
+    const hasCredentialsInConfig =
+      config.export?.s3?.credentials ||
+      config.export?.gcs?.credentials;
+
+    if (hasCredentialsInConfig) {
+      console.log(chalk.yellow('\n⚠️  SECURITY WARNING: Credentials detected in ' + configPath));
+      console.log(chalk.yellow('   - Don\'t commit this file to git'));
+      console.log(chalk.yellow('   - Use environment variables instead:'));
+      console.log(chalk.yellow('     • DLEST_EXPORT_S3_ACCESS_KEY_ID'));
+      console.log(chalk.yellow('     • DLEST_EXPORT_S3_SECRET_ACCESS_KEY'));
+      console.log(chalk.yellow('   - Or use IAM roles in CI/CD'));
+      console.log(chalk.gray('   See: https://dlest.dev/docs/export#security\n'));
+    }
   }
 
   /**

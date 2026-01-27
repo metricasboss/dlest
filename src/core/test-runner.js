@@ -23,6 +23,8 @@ class TestRunner {
       endTime: null,
     };
     this.failures = [];
+    this.testResults = []; // Track individual test results for export
+    this.currentFile = null; // Track current test file
     this.currentSuite = null;
     this.currentTest = null;
     this.collectedTests = [];
@@ -47,14 +49,37 @@ class TestRunner {
       }
 
       await this.browserManager.close();
-      
+
     } catch (error) {
       console.error(chalk.red('Fatal error during test execution:'), error);
       throw error;
     } finally {
       this.stats.endTime = Date.now();
+
+      // Export test results to cloud storage if enabled
+      if (this.config.export?.enabled) {
+        try {
+          const { TestResultExporter } = require('../export/exporter');
+          const exporter = new TestResultExporter(this.config);
+
+          await exporter.export(
+            {
+              stats: this.stats,
+              failures: this.failures,
+              tests: this.testResults
+            },
+            { config: this.config }
+          );
+        } catch (exportError) {
+          // Error already handled by exporter, just log if verbose
+          if (this.config.verbose) {
+            console.log(chalk.gray(`\n[DEBUG] Export error: ${exportError.message}`));
+          }
+        }
+      }
+
       this.printSummary();
-      
+
       if (this.config.verbose) {
         console.log(chalk.gray('\n[DEBUG] All tests completed, returning stats'));
       }
@@ -67,6 +92,7 @@ class TestRunner {
    * Run single test file
    */
   async runTestFile(testFilePath) {
+    this.currentFile = testFilePath; // Track current file for export
     console.log(chalk.gray(`\n📄 ${path.relative(process.cwd(), testFilePath)}`));
 
     try {
@@ -663,6 +689,13 @@ class TestRunner {
     global.dataLayer = testContext.dataLayer;
     global.network = testContext.network;
 
+    const testStartTime = Date.now();
+    let testStatus = 'passed';
+    let testError = null;
+    let testTip = null;
+    let testStack = null;
+    let dataLayerEvents = [];
+
     try {
       // Run beforeEach if defined
       if (this.beforeEachFn) {
@@ -679,20 +712,34 @@ class TestRunner {
       this.stats.passed++;
       console.log(chalk.green(`    ✓ ${name}`));
 
+      // Capture dataLayer events if export is enabled
+      if (this.config.export?.enabled && this.config.export?.include?.dataLayerEvents) {
+        try {
+          dataLayerEvents = await testContext.dataLayer.getEvents();
+        } catch (e) {
+          // Ignore errors when capturing events
+        }
+      }
+
     } catch (error) {
       // Test failed
       this.stats.failed++;
+      testStatus = 'failed';
       console.log(chalk.red(`    ✗ ${name}`));
-      
+
       // Enhanced error handling with helpful messages
       const enhancedError = this.enhanceErrorMessage(error);
+      testError = enhancedError.message;
+      testTip = enhancedError.tip;
+      testStack = error.stack;
+
       console.log(chalk.red(`      ${enhancedError.message}`));
-      
+
       // Show helpful tips for common errors
       if (enhancedError.tip) {
         console.log(chalk.yellow(`      💡 Tip: ${enhancedError.tip}`));
       }
-      
+
       this.failures.push({
         suite: this.currentSuite,
         test: name,
@@ -702,6 +749,22 @@ class TestRunner {
       });
 
     } finally {
+      // Record test result for export
+      const testDuration = Date.now() - testStartTime;
+
+      this.testResults.push({
+        name: name,
+        suite: this.currentSuite,
+        file: this.currentFile,
+        status: testStatus,
+        duration: testDuration,
+        timestamp: new Date().toISOString(),
+        error: testError,
+        tip: testTip,
+        stack: testStack,
+        dataLayerEvents: dataLayerEvents.length > 0 ? dataLayerEvents : undefined,
+      });
+
       // Run afterEach if defined
       if (this.afterEachFn) {
         try {

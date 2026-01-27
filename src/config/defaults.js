@@ -48,6 +48,47 @@ const defaults = {
     viewport: { width: 1280, height: 720 },
     locale: 'en-US',
     timezone: 'America/New_York',
+  },
+
+  // Cloud Export (disabled by default)
+  export: {
+    enabled: false,
+    provider: null, // 's3' or 'gcs'
+
+    // S3 configuration
+    s3: {
+      bucket: null,
+      region: 'us-east-1',
+      credentials: null,
+      pathPrefix: 'test-results'
+    },
+
+    // GCS configuration
+    gcs: {
+      bucket: null,
+      projectId: null,
+      credentials: null,
+      pathPrefix: 'test-results'
+    },
+
+    // File naming pattern
+    fileNaming: {
+      pattern: '{date}/{runId}.jsonl' // Tokens: {date}, {runId}, {branch}, {commit}, {env}
+    },
+
+    // What to include in export
+    include: {
+      testResults: true,
+      dataLayerEvents: true,
+      networkRequests: true,
+      environment: true,
+      config: false
+    },
+
+    // Error handling
+    failOnUploadError: false,
+    retries: 3,
+    timeout: 30000
   }
 };
 

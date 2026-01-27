@@ -13,6 +13,167 @@
 - You should update the plan as you work.
 - After you complete tasks in the plan, you should update and append detailed descriptions of the changes you made, so following tasks can be easily hand over to other engineers
 
+## Uso Estratégico de Agentes AI
+
+### Visão Geral
+O projeto possui uma coleção de agentes especializados em `.claude/agents/` que podem acelerar significativamente o desenvolvimento do DLest. Cada agente é expert em seu domínio e pode ser invocado via Task tool quando sua expertise é necessária.
+
+### Agentes Principais para DLest
+
+#### 1. **test-writer-fixer** (Essencial)
+- **Quando usar**: SEMPRE após modificações de código
+- **Especialidade**: Escrever testes abrangentes, corrigir testes quebrados, manter integridade da suite
+- **Uso no DLest**: 
+  - Criar testes para os matchers customizados (`toHaveEvent`, `toHaveEventCount`)
+  - Testar a injeção do spy no dataLayer
+  - Validar integração com Playwright
+  - Garantir cobertura de testes para CLI commands
+- **Trigger automático**: Após implementar features ou corrigir bugs
+
+#### 2. **rapid-prototyper** (MVP e Features)
+- **Quando usar**: Criar novos recursos ou protótipos rapidamente
+- **Especialidade**: Scaffolding, integração de APIs, MVPs funcionais
+- **Uso no DLest**:
+  - Criar templates de teste para e-commerce
+  - Implementar novas features como watch mode
+  - Prototipar integrações (GitHub Actions, VS Code extension)
+  - Adicionar suporte para novos frameworks de teste
+
+#### 3. **api-tester** (Validação de Performance)
+- **Quando usar**: Testar performance e confiabilidade das APIs
+- **Especialidade**: Load testing, contract testing, performance profiling
+- **Uso no DLest**:
+  - Testar o desempenho do runner com múltiplos testes
+  - Validar que o spy não impacta performance do site
+  - Benchmark do tempo de execução dos testes
+  - Stress test com grandes volumes de eventos
+
+#### 4. **performance-benchmarker** (Otimização)
+- **Quando usar**: Identificar e resolver gargalos de performance
+- **Especialidade**: Profiling, otimização, métricas de performance
+- **Uso no DLest**:
+  - Garantir execução < 500ms por teste
+  - Otimizar injeção e captura de eventos
+  - Minimizar overhead do spy
+  - Melhorar tempo de startup do CLI
+
+#### 5. **frontend-developer** (Interface e UX)
+- **Quando usar**: Desenvolver interfaces de usuário
+- **Especialidade**: React, Vue, TypeScript, responsive design
+- **Uso no DLest**:
+  - Criar dashboard de coverage
+  - Desenvolver reporter visual
+  - Implementar UI para configuração
+  - Criar extensão VS Code
+
+#### 6. **trend-researcher** (Oportunidades de Mercado)
+- **Quando usar**: Identificar tendências e validar features
+- **Especialidade**: Análise de mercado, comportamento de usuário
+- **Uso no DLest**:
+  - Pesquisar necessidades de analytics testing
+  - Identificar features mais requisitadas
+  - Analisar competidores (Cypress, Jest)
+  - Descobrir padrões de uso em GA4/GTM
+
+### Workflow de Desenvolvimento com Agentes
+
+#### Fase 1: Planejamento e Research
+```markdown
+1. Use trend-researcher para validar necessidades do mercado
+2. Use rapid-prototyper para criar POC inicial
+3. Documente decisões em .claude/tasks/
+```
+
+#### Fase 2: Implementação
+```markdown
+1. Use rapid-prototyper para scaffolding de features
+2. Use frontend-developer para interfaces (se necessário)
+3. Use test-writer-fixer SEMPRE após código novo
+4. Atualize plano em .claude/tasks/ conforme progride
+```
+
+#### Fase 3: Otimização
+```markdown
+1. Use performance-benchmarker para identificar gargalos
+2. Use api-tester para validar robustez
+3. Use test-writer-fixer para garantir cobertura
+```
+
+#### Fase 4: Validação
+```markdown
+1. Use api-tester para stress testing
+2. Use performance-benchmarker para métricas finais
+3. Documente resultados e métricas
+```
+
+### Exemplos Práticos de Uso
+
+#### Exemplo 1: Adicionar novo matcher
+```bash
+# Solicitar ao Claude Code:
+"Preciso adicionar um matcher toHaveEventWithin(timeout, eventName) ao DLest"
+
+# Claude irá:
+1. Usar rapid-prototyper para criar estrutura do matcher
+2. Usar test-writer-fixer para escrever testes completos
+3. Usar performance-benchmarker para garantir performance
+```
+
+#### Exemplo 2: Implementar watch mode
+```bash
+# Solicitar:
+"Implementar watch mode que re-executa testes quando arquivos mudam"
+
+# Claude irá:
+1. Usar rapid-prototyper para implementação inicial
+2. Usar test-writer-fixer para criar testes
+3. Usar performance-benchmarker para otimizar detecção de mudanças
+```
+
+#### Exemplo 3: Otimizar performance
+```bash
+# Solicitar:
+"Os testes estão demorando muito, preciso otimizar"
+
+# Claude irá:
+1. Usar performance-benchmarker para profiling
+2. Usar api-tester para identificar gargalos
+3. Implementar otimizações
+4. Usar test-writer-fixer para validar mudanças
+```
+
+### Comandos para Invocar Agentes
+
+```bash
+# Após modificar código (automático)
+"Use test-writer-fixer agent para garantir que os testes passam"
+
+# Para nova feature
+"Use rapid-prototyper agent para criar [feature]"
+
+# Para otimização
+"Use performance-benchmarker agent para analisar performance"
+
+# Para pesquisa
+"Use trend-researcher agent para entender [tópico]"
+```
+
+### Métricas de Sucesso com Agentes
+
+- **Cobertura de Testes**: > 90% com test-writer-fixer
+- **Performance**: < 500ms/teste com performance-benchmarker
+- **Time to MVP**: < 2 dias com rapid-prototyper
+- **Bugs em Produção**: < 1% com api-tester
+- **Velocidade de Desenvolvimento**: 2x com uso coordenado
+
+### Notas Importantes
+
+1. **Sempre use test-writer-fixer** após qualquer mudança de código
+2. **Documente em .claude/tasks/** todas as decisões tomadas pelos agentes
+3. **Use múltiplos agentes** em paralelo quando possível
+4. **Confie na expertise** dos agentes em seus domínios
+5. **Itere rapidamente** seguindo filosofia de 6-day sprints
+
 
 ## Project Overview
 

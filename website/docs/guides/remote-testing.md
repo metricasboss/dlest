@@ -69,6 +69,6 @@ module.exports = {
 
 ## Next Steps
 
-- Learn about [network validation](/docs/guides/network-validation)
-- See [CI/CD integration](/docs/advanced/ci-cd)
-- Explore [debugging techniques](/docs/guides/debugging)
+- Learn about [network validation](/guides/network-validation)
+- See [CI/CD integration](/advanced/ci-cd)
+- Explore [debugging techniques](/guides/debugging)

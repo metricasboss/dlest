@@ -81,7 +81,7 @@ test('example', async ({ page, dataLayer }) => {
 });
 ```
 
-[See all matchers →](/docs/api/matchers)
+[See all matchers →](/api/matchers)
 
 ### `network` - Network Requests
 
@@ -103,7 +103,7 @@ test('GA4 tracking', async ({ page, network }) => {
 });
 ```
 
-[Learn more about network validation →](/docs/guides/network-validation)
+[Learn more about network validation →](/guides/network-validation)
 
 ## Writing Effective Tests
 
@@ -292,10 +292,10 @@ test('CTA button click tracking', async ({ page, dataLayer }) => {
 
 Now that you understand test structure:
 
-1. Learn about all [available matchers](/docs/api/matchers)
-2. Explore [test templates](/docs/guides/templates) for common scenarios
-3. See [real-world examples](/docs/examples/ecommerce)
-4. Set up [debugging](/docs/guides/debugging) for troubleshooting
+1. Learn about all [available matchers](/api/matchers)
+2. Explore [test templates](/guides/templates) for common scenarios
+3. See [real-world examples](/examples/ecommerce)
+4. Set up [debugging](/guides/debugging) for troubleshooting
 
 ## Tips
 

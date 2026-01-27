@@ -51,5 +51,5 @@ test('debug with console', async ({ page, dataLayer }) => {
 
 ## Next Steps
 
-- Learn about [writing tests](/docs/guides/writing-tests)
-- Explore [available matchers](/docs/api/matchers)
+- Learn about [writing tests](/guides/writing-tests)
+- Explore [available matchers](/api/matchers)

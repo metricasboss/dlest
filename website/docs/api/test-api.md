@@ -35,10 +35,10 @@ Every test receives fixtures:
 - `dataLayer` - DLest dataLayer proxy for assertions
 - `network` - Network spy for GA4 validation
 
-See [Fixtures](/docs/api/fixtures) for details.
+See [Fixtures](/api/fixtures) for details.
 
 ## Next Steps
 
-- Learn about [available matchers](/docs/api/matchers)
-- Explore [test fixtures](/docs/api/fixtures)
-- See [real-world examples](/docs/examples/ecommerce)
+- Learn about [available matchers](/api/matchers)
+- Explore [test fixtures](/api/fixtures)
+- See [real-world examples](/examples/ecommerce)

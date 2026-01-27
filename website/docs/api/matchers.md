@@ -131,7 +131,7 @@ await expect(network).toHaveGA4Event('purchase', {
 - `eventName` (string): GA4 event name
 - `eventData` (object, optional): Expected event parameters
 
-**Note:** Requires the `network` fixture. See [Network Validation](/docs/guides/network-validation).
+**Note:** Requires the `network` fixture. See [Network Validation](/guides/network-validation).
 
 ## General Matchers
 
@@ -439,7 +439,7 @@ await expect(dataLayer).toHaveEventCount('purchase', 1);
 
 ## Next Steps
 
-- See [real-world examples](/docs/examples/ecommerce)
-- Learn about [test fixtures](/docs/api/fixtures)
-- Explore [network validation](/docs/guides/network-validation)
-- Read the [Test API reference](/docs/api/test-api)
+- See [real-world examples](/examples/ecommerce)
+- Learn about [test fixtures](/api/fixtures)
+- Explore [network validation](/guides/network-validation)
+- Read the [Test API reference](/api/test-api)

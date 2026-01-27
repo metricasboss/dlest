@@ -40,6 +40,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          routeBasePath: '/', // Docs na raiz do site
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -81,6 +82,7 @@ const config: Config = {
       logo: {
         alt: 'DLest Logo',
         src: 'img/logo.svg',
+        href: '/getting-started/installation',
       },
       items: [
         {
@@ -116,15 +118,15 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/getting-started/installation',
+              to: '/getting-started/installation',
             },
             {
               label: 'API Reference',
-              to: '/docs/api/matchers',
+              to: '/api/matchers',
             },
             {
               label: 'Examples',
-              to: '/docs/examples/ecommerce',
+              to: '/examples/ecommerce',
             },
           ],
         },

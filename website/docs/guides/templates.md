@@ -29,5 +29,5 @@ Includes tests for:
 
 ## Next Steps
 
-- See [real-world examples](/docs/examples/ecommerce)
-- Learn about [writing tests](/docs/guides/writing-tests)
+- See [real-world examples](/examples/ecommerce)
+- Learn about [writing tests](/guides/writing-tests)

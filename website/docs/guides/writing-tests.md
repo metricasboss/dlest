@@ -102,7 +102,7 @@ test('example', async ({ page, dataLayer }) => {
 });
 ```
 
-[All matchers →](/docs/api/matchers)
+[All matchers →](/api/matchers)
 
 ### Network - HTTP Requests
 
@@ -121,7 +121,7 @@ test('example', async ({ page, network }) => {
 });
 ```
 
-[Network validation guide →](/docs/guides/network-validation)
+[Network validation guide →](/guides/network-validation)
 
 ## Jest Matchers
 
@@ -447,7 +447,7 @@ test('debug with console', async ({ page, dataLayer }) => {
 
 ## Next Steps
 
-- Learn about [available matchers](/docs/api/matchers)
-- See [real-world examples](/docs/examples/ecommerce)
-- Set up [remote testing](/docs/guides/remote-testing)
-- Configure [network validation](/docs/guides/network-validation)
+- Learn about [available matchers](/api/matchers)
+- See [real-world examples](/examples/ecommerce)
+- Set up [remote testing](/guides/remote-testing)
+- Configure [network validation](/guides/network-validation)

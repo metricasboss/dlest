@@ -166,10 +166,10 @@ npm run test:verbose
 
 Now that you have DLest running:
 
-1. Learn how to [write effective tests](/docs/getting-started/first-test)
-2. Explore available [custom matchers](/docs/api/matchers)
-3. Check out [real-world examples](/docs/examples/ecommerce)
-4. Set up [remote testing](/docs/guides/remote-testing) for your environments
+1. Learn how to [write effective tests](/getting-started/first-test)
+2. Explore available [custom matchers](/api/matchers)
+3. Check out [real-world examples](/examples/ecommerce)
+4. Set up [remote testing](/guides/remote-testing) for your environments
 
 ## Troubleshooting
 

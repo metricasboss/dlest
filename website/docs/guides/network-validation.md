@@ -72,6 +72,6 @@ test('validate GA4 limits', async ({ page, network }) => {
 
 ## Next Steps
 
-- See [GA4 validation examples](/docs/advanced/ga4-validation)
-- Learn about [remote testing](/docs/guides/remote-testing)
-- Explore [debugging techniques](/docs/guides/debugging)
+- See [GA4 validation examples](/advanced/ga4-validation)
+- Learn about [remote testing](/guides/remote-testing)
+- Explore [debugging techniques](/guides/debugging)

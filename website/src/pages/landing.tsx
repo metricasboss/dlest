@@ -7,7 +7,7 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
 
-import styles from './index.module.css';
+import styles from './landing.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -21,12 +21,12 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/getting-started/installation">
+            to="/getting-started/installation">
             Get Started
           </Link>
           <Link
             className="button button--outline button--secondary button--lg"
-            to="/docs/examples/ecommerce"
+            to="/examples/ecommerce"
             style={{marginLeft: '10px'}}>
             View Examples
           </Link>

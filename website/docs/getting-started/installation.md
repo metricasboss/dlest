@@ -54,9 +54,9 @@ You should see the installed version number.
 
 Now that you have DLest installed, you can:
 
-1. [Initialize your project](/docs/getting-started/quick-start) with `npx dlest init`
-2. [Write your first test](/docs/getting-started/first-test)
-3. Learn about [available matchers](/docs/api/matchers)
+1. [Initialize your project](/getting-started/quick-start) with `npx dlest init`
+2. [Write your first test](/getting-started/first-test)
+3. Learn about [available matchers](/api/matchers)
 
 ## Troubleshooting
 

@@ -20,6 +20,7 @@ const sidebars: SidebarsConfig = {
         'guides/writing-tests',
         'guides/remote-testing',
         'guides/network-validation',
+        'guides/cloud-export',
         'guides/templates',
         'guides/debugging',
       ],

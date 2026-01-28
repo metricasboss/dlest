@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ### 🚀 New Features
 
+- **Cloud Export**: Export test results to AWS S3 or Google Cloud Storage
+  - **JSONL Format**: One line per test for easy querying with BigQuery/Athena
+  - **Rich Metadata**: Includes git info, CI environment, system details, and dataLayer events
+  - **Multiple Providers**: Support for AWS S3 and Google Cloud Storage
+  - **File Patterns**: Customizable naming with tokens (`{date}`, `{runId}`, `{branch}`, `{commit}`, `{env}`)
+  - **Retry Logic**: Exponential backoff for network failures
+  - **Local Fallback**: Saves to `.dlest-cache/failed-exports/` if upload fails
+  - **Security**: Automatic warnings for hardcoded credentials, strips sensitive data
+  - **Environment Variables**: Full support for secure configuration
+  - **Use Cases**: Track test health, debug issues, build dashboards, setup alerts
+  - See [docs/EXPORT.md](docs/EXPORT.md) for complete documentation
+
 - **Network Request Validation**: Intercept and validate actual GA4 network requests
   - New `network` fixture provides access to captured analytics requests
   - `await expect(network).toHaveGA4Event('purchase')` matcher for network validation
@@ -49,6 +61,11 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Added comprehensive cloud export documentation (docs/EXPORT.md)
+- Cloud provider setup guides for S3 and GCS
+- CI/CD integration examples (GitHub Actions, GitLab CI)
+- Query examples for BigQuery and Athena
+- Security best practices for cloud exports
 - Added comprehensive network validation documentation
 - GA4 validation error reference table
 - Migration guide for Universal Analytics users
@@ -57,7 +74,12 @@ All notable changes to this project will be documented in this file.
 
 ### 🧪 Testing
 
+- Cloud export: 8/8 tests passing (100%)
+  - MetadataCollector: runId generation, git info, system info, file patterns
+  - JSONLFormatter: metadata, test results, summary, sensitive data stripping
+  - JSONL format validation
 - Core functionality: 5/5 tests passing (100%)
+- Total: 13/13 tests passing (100%)
 - Reorganized test structure for better maintainability
 - Added smoke tests for framework validation
 

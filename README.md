@@ -15,6 +15,7 @@ DLest provides familiar Jest-like syntax for validating data layer events in web
 - 🎯 **Purpose-built** - Designed specifically for analytics testing
 - 🚀 **Fast & Reliable** - Built on Playwright for real browser testing
 - 🌐 **Remote Testing** - Test staging/production sites directly
+- ☁️ **Cloud Export** - Export test results to S3/GCS for dashboards
 - 📦 **Zero Config** - Works out of the box with sensible defaults
 - 🔧 **Extensible** - Custom matchers and templates for your needs
 - 🛠️ **Built-in Server** - No need for Python or external tools
@@ -70,6 +71,7 @@ npx dlest https://production.example.com --ci
 - **[Writing Tests](https://metricasboss.github.io/dlest/guides/writing-tests)** - Complete guide to writing analytics tests
 - **[API Reference](https://metricasboss.github.io/dlest/api/matchers)** - All available matchers and APIs
 - **[Remote Testing](https://metricasboss.github.io/dlest/guides/remote-testing)** - Test staging and production environments
+- **[Cloud Export](docs/EXPORT.md)** - Export test results to S3/GCS for dashboards
 - **[Network Validation](https://metricasboss.github.io/dlest/guides/network-validation)** - GA4 network request validation
 - **[Examples](https://metricasboss.github.io/dlest/examples/ecommerce)** - Real-world usage examples
 
@@ -185,6 +187,54 @@ Shows:
 - Expected vs found comparison
 - DataLayer structure analysis
 - Helpful error messages in Portuguese
+
+## Cloud Export (NEW!)
+
+Export test results to cloud storage for dashboards and analytics:
+
+```bash
+# Install provider SDK
+npm install --save-optional @aws-sdk/client-s3
+
+# Configure via environment variables
+export DLEST_EXPORT_ENABLED=true
+export DLEST_EXPORT_PROVIDER=s3
+export DLEST_EXPORT_S3_BUCKET=my-dlest-results
+export DLEST_EXPORT_S3_ACCESS_KEY_ID=AKIA...
+export DLEST_EXPORT_S3_SECRET_ACCESS_KEY=...
+
+# Run tests - results are automatically exported
+npx dlest
+```
+
+### Features
+
+- ☁️ **AWS S3 & Google Cloud Storage** - Support for major cloud providers
+- 📊 **JSONL Format** - One line per test, easy to query with BigQuery/Athena
+- 🔐 **Secure** - Warnings for hardcoded credentials, strip sensitive data
+- 🔄 **Retry Logic** - Exponential backoff for network issues
+- 💾 **Local Fallback** - Saves locally if upload fails
+- 🎯 **Rich Metadata** - Includes git info, CI environment, system details
+- 📁 **File Patterns** - Customizable naming with tokens (`{date}`, `{branch}`, etc)
+
+### Exported Data
+
+Each JSONL file contains:
+```jsonl
+{"type":"run_metadata","runId":"20240127120000-abc123","git":{...},"ci":{...}}
+{"type":"test","runId":"...","suite":"Purchase","name":"complete flow","status":"passed","duration":1234,"dataLayerEvents":[...]}
+{"type":"run_summary","runId":"...","stats":{"total":10,"passed":8,"failed":2}}
+```
+
+### Use Cases
+
+- 📈 **Track Test Health** - Monitor pass/fail rates over time
+- 🔍 **Debug Production Issues** - Compare expected vs actual events
+- 📊 **Build Dashboards** - Visualize test results in Tableau/Metabase
+- 🚨 **Setup Alerts** - Get notified when tests fail in CI/CD
+- 📉 **Performance Analysis** - Track test duration trends
+
+**Full documentation:** [docs/EXPORT.md](docs/EXPORT.md)
 
 ## Custom Matchers
 

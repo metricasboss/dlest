@@ -3,6 +3,8 @@ const path = require('path');
 const { ConfigLoader } = require('../config/loader');
 const { TestRunner } = require('../core/test-runner');
 const { ChromeRecorderParser } = require('../recorder/parser');
+const { PuppeteerReplayParser } = require('../recorder/puppeteer-replay-parser');
+const { FormatDetector } = require('../recorder/format-detector');
 const { AnalyticsMapper } = require('../recorder/analytics-mapper');
 const { TestGenerator } = require('../recorder/test-generator');
 const chalk = require('chalk');
@@ -251,11 +253,11 @@ class Commands {
   }
 
   /**
-   * Generate DLest test from Chrome DevTools Recorder JSON
+   * Generate DLest test from Chrome DevTools Recorder or Puppeteer Replay JSON
    */
   async generate(options = {}) {
     try {
-      console.log(chalk.cyan('🤖 Generating DLest test from Chrome Recorder...\n'));
+      console.log(chalk.cyan('🤖 Generating DLest test from recording...\n'));
 
       // Validate input file
       const recordingFile = options.fromRecording;
@@ -270,8 +272,19 @@ class Commands {
       // Read and parse recording
       console.log(chalk.gray(`📖 Reading recording from: ${recordingFile}`));
       const recordingContent = fs.readFileSync(recordingFile, 'utf8');
-      
-      const parser = new ChromeRecorderParser();
+
+      // Detect format
+      const { format, confidence } = FormatDetector.detect(recordingContent);
+      console.log(chalk.gray(`📋 Detected format: ${format} (confidence: ${confidence})`));
+
+      // Choose parser based on format
+      let parser;
+      if (format === 'puppeteer-replay') {
+        parser = new PuppeteerReplayParser();
+      } else {
+        parser = new ChromeRecorderParser();
+      }
+
       const parsedRecording = parser.parseRecording(recordingContent);
       
       console.log(chalk.green(`✅ Parsed ${parsedRecording.processedSteps.length} steps from recording`));

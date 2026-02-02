@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### 🎯 New Features
+
+- **Puppeteer Replay Support**: `dlest generate` now supports Puppeteer Replay JSON format in addition to Chrome DevTools Recorder
+  - Automatically detects recording format (Chrome DevTools Recorder vs Puppeteer Replay)
+  - Converts Puppeteer-specific types (`change`, `doubleClick`) to equivalent Playwright actions
+  - Maintains compatibility with existing Chrome Recorder workflows
+  - Example recordings provided for both formats in `examples/recordings/`
+
+### 🔧 Improvements
+
+- **Format Auto-Detection**: Added intelligent format detection with confidence levels (high/medium/low)
+- **Unified Pipeline**: Both recording formats are normalized to a common internal format
+- **Enhanced Analytics Detection**: Same smart analytics event detection works for both formats
+
+### 📚 Documentation
+
+- Added comprehensive guide on using Puppeteer Replay recordings
+- Updated README with `dlest generate` examples for both formats
+- Added example recordings for Chrome Recorder and Puppeteer Replay
+
+### 🧪 Testing
+
+- Added 50+ new tests for format detection and Puppeteer parsing
+- Integration tests verify both formats generate equivalent output
+- Regression tests ensure Chrome Recorder still works perfectly
+
 ## [0.5.0] - 2026-01-27
 
 ### 🚀 New Features

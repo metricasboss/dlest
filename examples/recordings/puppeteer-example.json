@@ -1,0 +1,35 @@
+{
+  "title": "E-commerce Add to Cart",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1280,
+      "height": 720,
+      "deviceScaleFactor": 2,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://shop.example.com/product/123"
+    },
+    {
+      "type": "click",
+      "selectors": ["[data-testid='add-to-cart']", ".add-to-cart-btn", "#addToCart"],
+      "offsetX": 10,
+      "offsetY": 5
+    },
+    {
+      "type": "change",
+      "selectors": ["#quantity", "[name='quantity']"],
+      "value": "2"
+    },
+    {
+      "type": "click",
+      "selectors": ["[data-testid='checkout-button']", "#checkout"],
+      "offsetX": 15,
+      "offsetY": 10
+    }
+  ]
+}

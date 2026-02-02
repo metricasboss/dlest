@@ -318,6 +318,12 @@ npx dlest init
 # Initialize with e-commerce template
 npx dlest init --template=ecommerce
 
+# Generate test from browser recording
+npx dlest generate --from-recording recording.json
+npx dlest generate --from-recording recording.json --preview
+npx dlest generate --from-recording recording.json --output tests/my-test.test.js
+npx dlest generate --from-recording recording.json --template ecommerce
+
 # Install Playwright browsers
 npx dlest install
 
@@ -327,6 +333,60 @@ npm run test:serve    # Run tests with auto-server
 npm run serve         # Start development server
 npm run serve:dev     # Start server with verbose logging
 ```
+
+## Generate Tests from Browser Recordings
+
+DLest can automatically generate tests from browser recordings made with Chrome DevTools Recorder or Puppeteer Replay. This allows you to record user journeys in your browser and convert them into analytics tests.
+
+### Supported Formats
+
+- **Chrome DevTools Recorder** - Export recordings from Chrome DevTools (JSON format)
+- **Puppeteer Replay** - JSON recordings from Puppeteer Replay
+
+### How to Use
+
+1. **Record user journey in Chrome DevTools**:
+   - Open Chrome DevTools (F12)
+   - Go to "Recorder" tab
+   - Click "Create a new recording"
+   - Perform the user actions you want to test
+   - Export the recording as JSON
+
+2. **Generate DLest test**:
+   ```bash
+   # Preview the generated test
+   npx dlest generate --from-recording recording.json --preview
+
+   # Generate test file
+   npx dlest generate --from-recording recording.json --output tests/my-flow.test.js
+
+   # Use e-commerce template for better event detection
+   npx dlest generate --from-recording recording.json --template ecommerce
+   ```
+
+3. **Review and run the test**:
+   ```bash
+   # The generated test will include:
+   # - All user interactions (clicks, form fills, navigation)
+   # - Suggested analytics events based on selectors and patterns
+   # - TODO comments for manual adjustments
+
+   npx dlest tests/my-flow.test.js
+   ```
+
+### Example
+
+Recording an e-commerce add-to-cart flow in Chrome DevTools and generating a test:
+
+```bash
+npx dlest generate --from-recording ecommerce-flow.json --template ecommerce
+```
+
+Generated test will automatically detect analytics events like:
+- `page_view` on navigation
+- `add_to_cart` when clicking add-to-cart buttons
+- `begin_checkout` when clicking checkout
+- `form_interaction` on form fills
 
 ## Development Server
 
@@ -339,7 +399,7 @@ npx dlest serve
 # Custom port
 npx dlest serve --port 8080
 
-# Custom root directory  
+# Custom root directory
 npx dlest serve --root ./dist
 
 # Custom host (for network access)

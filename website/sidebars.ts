@@ -18,6 +18,8 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'guides/writing-tests',
+        'guides/puppeteer-replay',
+        'guides/puppeteer-replay-pt-br',
         'guides/remote-testing',
         'guides/network-validation',
         'guides/cloud-export',

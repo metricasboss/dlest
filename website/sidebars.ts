@@ -19,7 +19,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/writing-tests',
         'guides/puppeteer-replay',
-        'guides/puppeteer-replay-pt-br',
         'guides/remote-testing',
         'guides/network-validation',
         'guides/cloud-export',
